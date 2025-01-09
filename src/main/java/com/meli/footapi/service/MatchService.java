@@ -19,13 +19,11 @@ public class MatchService {
     @Autowired
     private MatchRepo matchRepo;
 
-    public PartidaDto createMatch(PartidaDto matchDto) {
-        validateMatchInput(matchDto);
+    public PartidaDto createMatch(Partida partida) {
+        validateMatchInput(partida);
+        matchRepo.save(partida);
 
-        Partida match = PartidaDto.dtoToPartida(matchDto);
-        matchRepo.save(match);
-
-        return matchDto;
+        return PartidaDto.partidaToDto(partida);
     }
 
     public List<PartidaDto> getMatchs() {
@@ -50,18 +48,20 @@ public class MatchService {
         return dto;
     }
 
-    public PartidaDto updateMatch(int id, PartidaDto updatedMatchInfo) {
-        PartidaDto matchToBeUpdated = getMatchById(id);
+    public PartidaDto updateMatch(int id, Partida dadosAtualizados) {
+        Partida partida = this.matchRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não foi encontrada nenhuma partida com ID" + id + ". Portanto, deve ser primeiro criada uma partida com este identificador, para então modifica-la."));
+        validateMatchInput(partida);
 
-        validateMatchInput(updatedMatchInfo);
+        partida.setClubeDaCasa(dadosAtualizados.getClubeDaCasa());
+        partida.setClubeVisitante(dadosAtualizados.getClubeVisitante());
+        partida.setEstadio(dadosAtualizados.getEstadio());
+        partida.setGolsClubeDaCasa(dadosAtualizados.getGolsClubeDaCasa());
+        partida.setGolsClubeVisitante(dadosAtualizados.getGolsClubeVisitante());
+        partida.setEstadio(dadosAtualizados.getEstadio());
 
-        matchToBeUpdated.setId(id);
+        matchRepo.save(partida);
 
-
-        Partida updatedMatch = PartidaDto.dtoToPartida(matchToBeUpdated);
-        matchRepo.save(updatedMatch);
-
-        return matchToBeUpdated;
+        return PartidaDto.partidaToDto(partida);
     }
 
     public void deleteMatch(int id) {
@@ -73,7 +73,7 @@ public class MatchService {
     }
 
 
-    private void validateMatchInput(PartidaDto matchToValidate) {
+    private void validateMatchInput(Partida matchToValidate) {
         // fazer validações que dão throw se der errado
     };
 

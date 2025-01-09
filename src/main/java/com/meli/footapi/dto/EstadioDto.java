@@ -1,12 +1,8 @@
 package com.meli.footapi.dto;
 
-import java.util.List;
-
 import org.modelmapper.ModelMapper;
 
 import com.meli.footapi.entity.Estadio;
-import com.meli.footapi.entity.Partida;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,8 +13,6 @@ import lombok.NoArgsConstructor;
 public class EstadioDto {
     private int id;
     private String name;
-    private ClubeDto clube;
-    private List<Partida> partida;
 
     public static Estadio dtoToEstadio(EstadioDto dto) {
         ModelMapper mapper = new ModelMapper();

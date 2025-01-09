@@ -25,8 +25,7 @@ public class PartidaDto {
 
         return partida;
     }
-
-
+    
     public static PartidaDto partidaToDto(Partida partida) {
         ModelMapper mapper = new ModelMapper();
 

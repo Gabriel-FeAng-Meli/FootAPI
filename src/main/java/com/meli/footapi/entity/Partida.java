@@ -30,7 +30,7 @@ public class Partida {
     @Column(nullable = false, updatable = false)
     private int golsClubeVisitante;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(nullable = false, updatable = false, name = "estadio_id")
     private Estadio estadio;
 
