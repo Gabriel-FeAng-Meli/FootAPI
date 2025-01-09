@@ -7,24 +7,24 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "CLUB")
+@Table(name = "clubes")
 public class Club {
 
-    @GeneratedValue
     @Id
-    @Column(nullable=false, name="ID")
+    @GeneratedValue
+    @Column(nullable=false, name="clube_id")
     private int id;
     
-    @Column(name="NAME")
+    @Column(name="clube_nome")
     private String name;
 
-    @Column(name="STATE")
+    @Column(name="clube_estado")
     private String state;
 
-    @Column(name="ACTIVE")
+    @Column(name="clube_ativo")
     private boolean active;
 
-    @Column(name="DATE")
+    @Column(name="clube_data")
     private LocalDate date;
 
 }
