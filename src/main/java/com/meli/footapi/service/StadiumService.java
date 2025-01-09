@@ -8,8 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.meli.footapi.dto.StadiumDto;
-import com.meli.footapi.entity.Stadium;
+import com.meli.footapi.dto.EstadioDto;
+import com.meli.footapi.entity.Estadio;
 import com.meli.footapi.repository.StadiumRepo;
 
 
@@ -19,53 +19,53 @@ public class StadiumService {
     @Autowired
     private StadiumRepo stadiumRepo;
 
-    public StadiumDto createStadium(StadiumDto stadiumDto) {
+    public EstadioDto createStadium(EstadioDto stadiumDto) {
         validateStadiumInput(stadiumDto);
 
-        Stadium stadium = StadiumDto.dtoToStadium(stadiumDto);
+        Estadio stadium = EstadioDto.dtoToStadium(stadiumDto);
         stadiumRepo.save(stadium);
 
         return stadiumDto;
     }
 
-    public List<StadiumDto> getStadiums() {
-        List<StadiumDto> dtoList = new ArrayList<>();
-        List<Stadium> stadiumList = stadiumRepo.findAll();
+    public List<EstadioDto> getStadiums() {
+        List<EstadioDto> dtoList = new ArrayList<>();
+        List<Estadio> stadiumList = stadiumRepo.findAll();
     
         for (int i = 0; i < stadiumList.size(); i++) {
-            Stadium c = stadiumList.get(i);
-            dtoList.add(StadiumDto.stadiumToDto(c));
+            Estadio c = stadiumList.get(i);
+            dtoList.add(EstadioDto.stadiumToDto(c));
         }
 
         return dtoList;
     }
 
-    public StadiumDto getStadiumById(int id) {
+    public EstadioDto getStadiumById(int id) {
 
-        Stadium stadium = this.stadiumRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+        Estadio stadium = this.stadiumRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
         "Não foi encontrado nenhum estádio com o ID " + id));
 
-        StadiumDto dto = StadiumDto.stadiumToDto(stadium);
+        EstadioDto dto = EstadioDto.stadiumToDto(stadium);
 
         return dto;
     }
 
-    public StadiumDto updateStadium(int id, StadiumDto updatedStadiumInfo) {
-        StadiumDto stadiumToBeUpdated = getStadiumById(id);
+    public EstadioDto updateStadium(int id, EstadioDto updatedStadiumInfo) {
+        EstadioDto stadiumToBeUpdated = getStadiumById(id);
 
         validateStadiumInput(updatedStadiumInfo);
 
         stadiumToBeUpdated.setId(id);
         stadiumToBeUpdated.setName(updatedStadiumInfo.getName());
 
-        Stadium updatedStadium = StadiumDto.dtoToStadium(stadiumToBeUpdated);
+        Estadio updatedStadium = EstadioDto.dtoToStadium(stadiumToBeUpdated);
         stadiumRepo.save(updatedStadium);
 
         return stadiumToBeUpdated;
     }
 
     public void deleteStadium(int id) {
-        Stadium stadiumToDelete = stadiumRepo.findById(id)
+        Estadio stadiumToDelete = stadiumRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Não foi encontrado nenhum estádio com o ID " + id));
 
         stadiumRepo.delete(stadiumToDelete);
@@ -73,7 +73,7 @@ public class StadiumService {
     }
 
 
-    private void validateStadiumInput(StadiumDto stadiumToValidate) {
+    private void validateStadiumInput(EstadioDto stadiumToValidate) {
         // fazer validações que dão throw se der errado
     };
 

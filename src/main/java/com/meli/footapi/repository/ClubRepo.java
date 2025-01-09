@@ -1,12 +1,12 @@
 package com.meli.footapi.repository;
 
-import com.meli.footapi.entity.Club;
+import com.meli.footapi.entity.Clube;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @EnableJpaRepositories
-public interface ClubRepo extends JpaRepository<Club, Integer> {
+public interface ClubRepo extends JpaRepository<Clube, Integer> {
 
 }

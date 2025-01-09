@@ -1,8 +1,8 @@
 package com.meli.footapi.service;
 
 import com.meli.footapi.enums.ValidBrazilStates;
-import com.meli.footapi.entity.Club;
-import com.meli.footapi.dto.ClubDto;
+import com.meli.footapi.entity.Clube;
+import com.meli.footapi.dto.ClubeDto;
 import com.meli.footapi.repository.ClubRepo;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,39 +18,41 @@ public class ClubService {
     @Autowired
     private ClubRepo clubRepo;
 
-    public ClubDto createClub(ClubDto clubDto) {
+    public ClubeDto createClub(ClubeDto clubDto) {
         validateClubInput(clubDto);
 
-        Club club = ClubDto.dtoToClub(clubDto);
+        Clube club = ClubeDto.dtoToClub(clubDto);
+        
         clubRepo.save(club);
+
 
         return clubDto;
     }
 
-    public List<ClubDto> getClubs() {
-        List<ClubDto> dtoList = new ArrayList<>();
-        List<Club> clubList = clubRepo.findAll();
+    public List<ClubeDto> getClubs() {
+        List<ClubeDto> dtoList = new ArrayList<>();
+        List<Clube> clubList = clubRepo.findAll();
     
         for (int i = 0; i < clubList.size(); i++) {
-            Club c = clubList.get(i);
-            dtoList.add(ClubDto.clubToDto(c));
+            Clube c = clubList.get(i);
+            dtoList.add(ClubeDto.clubToDto(c));
         }
 
         return dtoList;
     }
 
-    public ClubDto getClubById(int id) {
+    public ClubeDto getClubById(int id) {
 
-        Club club = this.clubRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+        Clube club = this.clubRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
         "Não foi encontrado nenhum clube com o ID " + id));
 
-        ClubDto dto = ClubDto.clubToDto(club);
+        ClubeDto dto = ClubeDto.clubToDto(club);
 
         return dto;
     }
 
-    public ClubDto updateClub(int id, ClubDto updatedClubInfo) {
-        ClubDto clubToBeUpdated = getClubById(id);
+    public ClubeDto updateClub(int id, ClubeDto updatedClubInfo) {
+        ClubeDto clubToBeUpdated = getClubById(id);
 
         validateClubInput(updatedClubInfo);
 
@@ -60,14 +62,14 @@ public class ClubService {
         clubToBeUpdated.setDate(updatedClubInfo.getDate());
 
 
-        Club updatedClub = ClubDto.dtoToClub(clubToBeUpdated);
+        Clube updatedClub = ClubeDto.dtoToClub(clubToBeUpdated);
         clubRepo.save(updatedClub);
 
         return clubToBeUpdated;
     }
 
     public void deleteClub(int id) {
-        Club clubToDelete = clubRepo.findById(id)
+        Clube clubToDelete = clubRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Não foi encontrado nenhum clube com o id " + id));
 
         clubRepo.delete(clubToDelete);
@@ -75,7 +77,7 @@ public class ClubService {
     }
 
 
-    private void validateClubInput(ClubDto clubToValidate) {
+    private void validateClubInput(ClubeDto clubToValidate) {
         String inputedName = clubToValidate.getName();
         if (inputedName == null || inputedName.isBlank() || inputedName.length() < 3) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O nome do clube deve conter no mínimo 3 letras.");
@@ -97,7 +99,7 @@ public class ClubService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A data de criação do clube não pode ser no futuro. Insira uma data valida no formato YYYY-MM-DD");
         }
 
-        List<ClubDto> existingClubs = getClubs();
+        List<ClubeDto> existingClubs = getClubs();
         existingClubs.stream().forEach(existingClub -> {
             if(existingClub.getName().equals(inputedName) && existingClub.getState().equals(inputedState)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Um clube de mesmo nome e mesmo estado já está cadastrado.");

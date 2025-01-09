@@ -2,31 +2,31 @@ package com.meli.footapi.dto;
 
 import java.time.LocalDate;
 
-import com.meli.footapi.entity.Club;
+import com.meli.footapi.entity.Clube;
 
 import lombok.Data;
 
 @Data
-public class ClubDto {
-    public static Club dtoToClub(ClubDto dto) {
+public class ClubeDto {
+    public static Clube dtoToClub(ClubeDto dto) {
 
-        Club resultingClub = new Club();
+        Clube resultingClub = new Clube();
         resultingClub.setActive(dto.isActive());
         resultingClub.setDate(dto.getDate());
         resultingClub.setId(dto.getId());
-        resultingClub.setName(dto.getName());
+        resultingClub.setNome(dto.getName());
         resultingClub.setState(dto.getState());
 
         return resultingClub;
     }
-    public static ClubDto clubToDto(Club club) {
+    public static ClubeDto clubToDto(Clube club) {
 
-        ClubDto resultingClubDto = new ClubDto();
+        ClubeDto resultingClubDto = new ClubeDto();
         resultingClubDto.setActive(club.isActive());
         resultingClubDto.setDate(club.getDate());
         resultingClubDto.setId(club.getId());
         resultingClubDto.setState(club.getState());
-        resultingClubDto.setName(club.getName());
+        resultingClubDto.setName(club.getNome());
 
         return resultingClubDto;
     }

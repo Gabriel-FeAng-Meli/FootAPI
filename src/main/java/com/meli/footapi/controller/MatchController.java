@@ -1,7 +1,7 @@
 package com.meli.footapi.controller;
 
 
-import com.meli.footapi.dto.MatchDto;
+import com.meli.footapi.dto.PartidaDto;
 import com.meli.footapi.service.MatchService;
 
 import java.util.List;
@@ -25,22 +25,22 @@ public class MatchController {
     private MatchService matchService;
 
     @PostMapping
-    public ResponseEntity<MatchDto> createMatch(@RequestBody MatchDto match) {
+    public ResponseEntity<PartidaDto> createMatch(@RequestBody PartidaDto match) {
         return ResponseEntity.status(201).body(matchService.createMatch(match));
     }
 
     @GetMapping("/{id}")
-    public MatchDto getMatchById(@PathVariable(value = "id") int matchId) {
+    public PartidaDto getMatchById(@PathVariable(value = "id") int matchId) {
         return matchService.getMatchById(matchId);
     }
 
     @GetMapping
-    public List<MatchDto> getAllMatchs() {
+    public List<PartidaDto> getAllMatchs() {
         return matchService.getMatchs();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateMatch(@PathVariable(value = "id") int matchId, @RequestBody MatchDto newMatchInfo) {
+    public ResponseEntity<?> updateMatch(@PathVariable(value = "id") int matchId, @RequestBody PartidaDto newMatchInfo) {
         return ResponseEntity.status(204).body(matchService.updateMatch(matchId, newMatchInfo));
     }
 
