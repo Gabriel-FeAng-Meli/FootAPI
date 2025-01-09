@@ -7,6 +7,8 @@ import com.meli.footapi.repository.ClubRepo;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,42 +20,49 @@ public class ClubService {
     @Autowired
     private ClubRepo clubRepo;
 
-    public ClubeDto createClub(ClubeDto clubDto) {
-        validateClubInput(clubDto);
+    public ClubeDto createClub(Clube clube) {
+        validateClubInput(clube);
+        clubRepo.save(clube);
 
-        Clube club = ClubeDto.dtoToClub(clubDto);
-        
-        clubRepo.save(club);
+        ModelMapper mapper = new ModelMapper();
 
+        ClubeDto clubeDto = mapper.map(clube, ClubeDto.class);
 
-        return clubDto;
+        return clubeDto;
     }
 
     public List<ClubeDto> getClubs() {
-        List<ClubeDto> dtoList = new ArrayList<>();
-        List<Clube> clubList = clubRepo.findAll();
-    
-        for (int i = 0; i < clubList.size(); i++) {
-            Clube c = clubList.get(i);
-            dtoList.add(ClubeDto.clubToDto(c));
-        }
 
+        ModelMapper mapper = new ModelMapper();
+        List<Clube> clubList = clubRepo.findAll();
+
+        List<ClubeDto> dtoList = new ArrayList<>();
+
+        clubList.forEach(clube -> {
+            ClubeDto dto = mapper.map(clube, ClubeDto.class);
+            dtoList.add(dto);
+        });
+    
         return dtoList;
     }
 
     public ClubeDto getClubById(int id) {
 
+        ModelMapper mapper = new ModelMapper();
+
         Clube club = this.clubRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
         "Não foi encontrado nenhum clube com o ID " + id));
 
-        ClubeDto dto = ClubeDto.clubToDto(club);
+        ClubeDto dto = mapper.map(club, ClubeDto.class);
 
         return dto;
     }
 
-    public ClubeDto updateClub(int id, ClubeDto updatedClubInfo) {
+    public ClubeDto updateClub(int id, Clube updatedClubInfo) {
         ClubeDto clubToBeUpdated = getClubById(id);
 
+        ModelMapper mapper = new ModelMapper();
+        
         validateClubInput(updatedClubInfo);
 
         clubToBeUpdated.setName(updatedClubInfo.getName());
@@ -61,8 +70,7 @@ public class ClubService {
         clubToBeUpdated.setActive(updatedClubInfo.isActive());
         clubToBeUpdated.setDate(updatedClubInfo.getDate());
 
-
-        Clube updatedClub = ClubeDto.dtoToClub(clubToBeUpdated);
+        Clube updatedClub = mapper.map(clubToBeUpdated, Clube.class);
         clubRepo.save(updatedClub);
 
         return clubToBeUpdated;
@@ -77,7 +85,7 @@ public class ClubService {
     }
 
 
-    private void validateClubInput(ClubeDto clubToValidate) {
+    private void validateClubInput(Clube clubToValidate) {
         String inputedName = clubToValidate.getName();
         if (inputedName == null || inputedName.isBlank() || inputedName.length() < 3) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O nome do clube deve conter no mínimo 3 letras.");

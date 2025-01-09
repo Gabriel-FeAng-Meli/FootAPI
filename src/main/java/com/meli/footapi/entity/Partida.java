@@ -20,9 +20,15 @@ public class Partida {
     @JoinColumn(nullable = false, updatable = false, name = "clube_da_casa_id")
     private Clube clubeDaCasa;
 
+    @Column(nullable = false, updatable = false)
+    private int golsClubeDaCasa;
+
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false, updatable = false, name = "clube_visitante_id")
     private Clube clubeVisitante;
+
+    @Column(nullable = false, updatable = false)
+    private int golsClubeVisitante;
 
     @ManyToOne
     @JoinColumn(nullable = false, updatable = false, name = "estadio_id")

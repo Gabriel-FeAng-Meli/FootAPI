@@ -2,6 +2,7 @@ package com.meli.footapi.controller;
 
 
 import com.meli.footapi.dto.ClubeDto;
+import com.meli.footapi.entity.Clube;
 import com.meli.footapi.service.ClubService;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class ClubController {
     private ClubService clubService;
 
     @PostMapping
-    public ResponseEntity<ClubeDto> createClub(@RequestBody ClubeDto club) {
+    public ResponseEntity<ClubeDto> createClub(@RequestBody Clube club) {
         return ResponseEntity.status(201).body(clubService.createClub(club));
     }
 
@@ -40,7 +41,7 @@ public class ClubController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateClub(@PathVariable(value = "id") int clubId, @RequestBody ClubeDto newClubInfo) {
+    public ResponseEntity<?> updateClub(@PathVariable(value = "id") int clubId, @RequestBody Clube newClubInfo) {
         return ResponseEntity.status(204).body(clubService.updateClub(clubId, newClubInfo));
     }
 

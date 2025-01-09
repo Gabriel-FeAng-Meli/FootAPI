@@ -26,4 +26,5 @@ public class Estadio {
     @OneToOne
     @JoinColumn(name = "estadio_id")
     private Clube clube;
+
 }

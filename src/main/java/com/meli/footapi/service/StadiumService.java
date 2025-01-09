@@ -22,7 +22,7 @@ public class StadiumService {
     public EstadioDto createStadium(EstadioDto stadiumDto) {
         validateStadiumInput(stadiumDto);
 
-        Estadio stadium = EstadioDto.dtoToStadium(stadiumDto);
+        Estadio stadium = EstadioDto.dtoToEstadio(stadiumDto);
         stadiumRepo.save(stadium);
 
         return stadiumDto;
@@ -34,7 +34,7 @@ public class StadiumService {
     
         for (int i = 0; i < stadiumList.size(); i++) {
             Estadio c = stadiumList.get(i);
-            dtoList.add(EstadioDto.stadiumToDto(c));
+            dtoList.add(EstadioDto.estadioToDto(c));
         }
 
         return dtoList;
@@ -45,7 +45,7 @@ public class StadiumService {
         Estadio stadium = this.stadiumRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
         "Não foi encontrado nenhum estádio com o ID " + id));
 
-        EstadioDto dto = EstadioDto.stadiumToDto(stadium);
+        EstadioDto dto = EstadioDto.estadioToDto(stadium);
 
         return dto;
     }
@@ -58,7 +58,7 @@ public class StadiumService {
         stadiumToBeUpdated.setId(id);
         stadiumToBeUpdated.setName(updatedStadiumInfo.getName());
 
-        Estadio updatedStadium = EstadioDto.dtoToStadium(stadiumToBeUpdated);
+        Estadio updatedStadium = EstadioDto.dtoToEstadio(stadiumToBeUpdated);
         stadiumRepo.save(updatedStadium);
 
         return stadiumToBeUpdated;

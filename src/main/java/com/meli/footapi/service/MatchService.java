@@ -22,7 +22,7 @@ public class MatchService {
     public PartidaDto createMatch(PartidaDto matchDto) {
         validateMatchInput(matchDto);
 
-        Partida match = PartidaDto.dtoToMatch(matchDto);
+        Partida match = PartidaDto.dtoToPartida(matchDto);
         matchRepo.save(match);
 
         return matchDto;
@@ -34,7 +34,7 @@ public class MatchService {
     
         for (int i = 0; i < matchList.size(); i++) {
             Partida c = matchList.get(i);
-            dtoList.add(PartidaDto.matchToDto(c));
+            dtoList.add(PartidaDto.partidaToDto(c));
         }
 
         return dtoList;
@@ -45,7 +45,7 @@ public class MatchService {
         Partida match = this.matchRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
         "Não foi encontrada nenhuma partida com o ID " + id));
 
-        PartidaDto dto = PartidaDto.matchToDto(match);
+        PartidaDto dto = PartidaDto.partidaToDto(match);
 
         return dto;
     }
@@ -58,7 +58,7 @@ public class MatchService {
         matchToBeUpdated.setId(id);
 
 
-        Partida updatedMatch = PartidaDto.dtoToMatch(matchToBeUpdated);
+        Partida updatedMatch = PartidaDto.dtoToPartida(matchToBeUpdated);
         matchRepo.save(updatedMatch);
 
         return matchToBeUpdated;
