@@ -1,7 +1,6 @@
 package com.meli.footapi.entity;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,15 +26,6 @@ public class Clube {
     private boolean ativo;
 
     private LocalDate dataDeCriacao;
-
-    @OneToMany
-    private List<Partida> partidasDeCasa;
-
-    @OneToMany
-    private List<Partida> partidasComoVisitante;
-
-    @OneToOne(mappedBy = "clube")
-    private Estadio estadio;
 
 }
 

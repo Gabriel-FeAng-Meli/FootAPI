@@ -1,7 +1,5 @@
 package com.meli.footapi.entity;
 
-import java.util.List;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,10 +16,7 @@ public class Estadio {
     @GeneratedValue
     private int id;
     
-    private String name;
-
-    @OneToMany
-    private List<Partida> partida;
+    private String nome;
 
     @OneToOne
     @JoinColumn(name = "estadio_id")

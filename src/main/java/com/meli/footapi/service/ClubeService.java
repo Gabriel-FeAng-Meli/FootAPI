@@ -28,11 +28,9 @@ public class ClubeService {
         validateClubInput(clube);
         clubRepo.save(clube);
 
-        ModelMapper mapper = new ModelMapper();
+        int id = clube.getId();
 
-        ClubeDto clubeDto = mapper.map(clube, ClubeDto.class);
-
-        return clubeDto;
+        return getClubById(id);
     }
 
     public List<ClubeDto> getClubs() {

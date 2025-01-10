@@ -2,6 +2,7 @@ package com.meli.footapi.controller;
 
 
 import com.meli.footapi.dto.EstadioDto;
+import com.meli.footapi.entity.Estadio;
 import com.meli.footapi.service.EstadioService;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class EstadioController {
     private EstadioService stadiumService;
 
     @PostMapping
-    public ResponseEntity<EstadioDto> createStadium(@RequestBody EstadioDto stadium) {
+    public ResponseEntity<EstadioDto> createStadium(@RequestBody Estadio stadium) {
         return ResponseEntity.status(201).body(stadiumService.createStadium(stadium));
     }
 
@@ -40,7 +41,7 @@ public class EstadioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateStadium(@PathVariable(value = "id") int stadiumId, @RequestBody EstadioDto newStadiumInfo) {
+    public ResponseEntity<?> updateStadium(@PathVariable(value = "id") int stadiumId, @RequestBody Estadio newStadiumInfo) {
         return ResponseEntity.status(204).body(stadiumService.updateStadium(stadiumId, newStadiumInfo));
     }
 

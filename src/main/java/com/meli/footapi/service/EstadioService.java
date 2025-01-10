@@ -17,13 +17,12 @@ public class EstadioService {
     @Autowired
     private EstadioRepository stadiumRepo;
 
-    public EstadioDto createStadium(EstadioDto stadiumDto) {
-        validateStadiumInput(stadiumDto);
+    public EstadioDto createStadium(Estadio stadium) {
+        validateStadiumInput(stadium);
 
-        Estadio stadium = EstadioDto.dtoToEstadio(stadiumDto);
         stadiumRepo.save(stadium);
 
-        return stadiumDto;
+        return getStadiumById(stadium.getId());
     }
 
     public List<EstadioDto> getStadiums() {
@@ -48,18 +47,18 @@ public class EstadioService {
         return dto;
     }
 
-    public EstadioDto updateStadium(int id, EstadioDto updatedStadiumInfo) {
-        EstadioDto stadiumToBeUpdated = getStadiumById(id);
+    public EstadioDto updateStadium(int id, Estadio updatedStadiumInfo) {
+        Estadio estadio = stadiumRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estadio não encontrado para realizar a alteração. Utilize um id de um estadio já cadastrado para realizar uma alteração."));
 
-        validateStadiumInput(updatedStadiumInfo);
+        estadio.setId(id);
+        estadio.setNome(updatedStadiumInfo.getNome());
+        estadio.setClube(updatedStadiumInfo.getClube());
 
-        stadiumToBeUpdated.setId(id);
-        stadiumToBeUpdated.setName(updatedStadiumInfo.getName());
+        stadiumRepo.save(estadio);
 
-        Estadio updatedStadium = EstadioDto.dtoToEstadio(stadiumToBeUpdated);
-        stadiumRepo.save(updatedStadium);
+        EstadioDto dto = EstadioDto.estadioToDto(estadio);
 
-        return stadiumToBeUpdated;
+        return dto;
     }
 
     public void deleteStadium(int id) {
@@ -71,16 +70,16 @@ public class EstadioService {
     }
 
 
-    private void validateStadiumInput(EstadioDto estadioParaValidar) {
+    private void validateStadiumInput(Estadio estadioParaValidar) {
 
-        String inputedName = estadioParaValidar.getName();
+        String inputedName = estadioParaValidar.getNome();
         if (inputedName == null || inputedName.isBlank() || inputedName.length() < 3) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O nome do estadio deve conter no mínimo 3 letras.");
         }
 
         List<EstadioDto> estadiosExistentes = getStadiums();
         estadiosExistentes.stream().forEach(estadio -> {
-            if(estadio.getName().equals(inputedName)) {
+            if(estadio.getNome().equals(inputedName)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Um estadio de mesmo nome já está cadastrado.");
             }
         });

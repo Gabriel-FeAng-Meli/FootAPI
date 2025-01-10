@@ -1,6 +1,5 @@
 package com.meli.footapi.dto;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.meli.footapi.entity.Clube;

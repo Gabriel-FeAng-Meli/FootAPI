@@ -28,13 +28,11 @@ public class PartidaService {
     public PartidaDto createMatch(Partida partida) {
         validateMatchInput(partida);
 
-        try {
-            matchRepo.save(partida);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não foi possivel criar a partida. Devem ser fornecidos dados validos de dois clubes existentes e ativos, alem de um estadio existente e uma data válida para criar uma partida.");
-        }
+        matchRepo.save(partida);
 
-        return PartidaDto.partidaToDto(partida);
+        int id = partida.getId();
+
+        return getMatchById(id);
     }
 
     public List<PartidaDto> getMatchs() {
