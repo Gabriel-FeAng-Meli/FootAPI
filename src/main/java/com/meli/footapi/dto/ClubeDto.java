@@ -15,10 +15,10 @@ import lombok.NoArgsConstructor;
 public class ClubeDto {
 
     private int id;
-    private String name;
-    private String state;
-    private boolean active;
-    private LocalDate date;
+    private String nome;
+    private String estado;
+    private boolean ativo;
+    private LocalDate dataDeCriacao;
 
     public static Clube dtoToClube(ClubeDto dto) {
         ModelMapper mapper = new ModelMapper();

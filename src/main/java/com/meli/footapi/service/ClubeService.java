@@ -65,10 +65,10 @@ public class ClubeService {
         
         validateClubInput(updatedClubInfo);
 
-        clubToBeUpdated.setName(updatedClubInfo.getName());
-        clubToBeUpdated.setState(updatedClubInfo.getState());
-        clubToBeUpdated.setActive(updatedClubInfo.isActive());
-        clubToBeUpdated.setDate(updatedClubInfo.getDate());
+        clubToBeUpdated.setNome(updatedClubInfo.getNome());
+        clubToBeUpdated.setEstado(updatedClubInfo.getEstado());
+        clubToBeUpdated.setAtivo(updatedClubInfo.isAtivo());
+        clubToBeUpdated.setDataDeCriacao(updatedClubInfo.getDataDeCriacao());
 
         Clube updatedClub = mapper.map(clubToBeUpdated, Clube.class);
         clubRepo.save(updatedClub);
@@ -86,12 +86,12 @@ public class ClubeService {
 
 
     private void validateClubInput(Clube clubToValidate) {
-        String inputedName = clubToValidate.getName();
+        String inputedName = clubToValidate.getNome();
         if (inputedName == null || inputedName.isBlank() || inputedName.length() < 3) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O nome do clube deve conter no mínimo 3 letras.");
         }
 
-        String inputedState = clubToValidate.getState();
+        String inputedState = clubToValidate.getEstado();
         boolean validState = false;
         for (ValidBrazilStates state : ValidBrazilStates.values()) {
             if (inputedState != null && state.toString().equals(inputedState.toUpperCase())) {
@@ -102,14 +102,14 @@ public class ClubeService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O estado escolhido não é um estado real do Brasil. Favor utilizar a sigla de um estado existente (exemplo: SP)");
         }
 
-        LocalDate inputedDate = clubToValidate.getDate();
+        LocalDate inputedDate = clubToValidate.getDataDeCriacao();
         if (inputedDate != null && inputedDate.isAfter(LocalDate.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A data de criação do clube não pode ser no futuro. Insira uma data valida no formato YYYY-MM-DD");
         }
 
         List<ClubeDto> existingClubs = getClubs();
         existingClubs.stream().forEach(existingClub -> {
-            if(existingClub.getName().equals(inputedName) && existingClub.getState().equals(inputedState)) {
+            if(existingClub.getNome().equals(inputedName) && existingClub.getEstado().equals(inputedState)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Um clube de mesmo nome e mesmo estado já está cadastrado.");
             }
         });

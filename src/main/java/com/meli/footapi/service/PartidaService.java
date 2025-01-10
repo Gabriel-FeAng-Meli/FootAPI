@@ -90,7 +90,7 @@ public class PartidaService {
         Clube clubeDaCasaInput = partidaParaValidar.getClubeDaCasa();
 
         Clube clubeDaCasa = ClubeDto.dtoToClube(clubService.getClubById(clubeDaCasaInput.getId()));
-        LocalDateTime dataCriaçãoClubeDaCasa = clubeDaCasa.getDate().atStartOfDay();
+        LocalDateTime dataCriaçãoClubeDaCasa = clubeDaCasa.getDataDeCriacao().atStartOfDay();
         List<Partida> partidasClubeDaCasa = matchRepo.findByClubeDaCasa(clubeDaCasaInput);
 
         partidasClubeDaCasa.forEach(p -> {
@@ -106,7 +106,7 @@ public class PartidaService {
         Clube clubeVisitanteInput = partidaParaValidar.getClubeVisitante();
 
         Clube clubeVisitante = ClubeDto.dtoToClube(clubService.getClubById(clubeVisitanteInput.getId()));
-        LocalDateTime dataCriaçãoClubeVisitante = clubeVisitante.getDate().atStartOfDay();
+        LocalDateTime dataCriaçãoClubeVisitante = clubeVisitante.getDataDeCriacao().atStartOfDay();
         List<Partida> partidasClubeVisitante = matchRepo.findByClubeVisitante(clubeVisitante);
 
         partidasClubeVisitante.forEach(p -> {

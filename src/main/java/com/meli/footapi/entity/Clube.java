@@ -20,19 +20,19 @@ public class Clube {
     @Column(nullable=false)
     private int id;
     
-    private String name;
+    private String nome;
     
-    private String state;
+    private String estado;
     
-    private boolean active;
+    private boolean ativo;
 
-    private LocalDate date;
+    private LocalDate dataDeCriacao;
 
     @OneToMany
-    private List<Partida> partidaDeCasa;
+    private List<Partida> partidasDeCasa;
 
     @OneToMany
-    private List<Partida> partidaVisitante;
+    private List<Partida> partidasComoVisitante;
 
     @OneToOne(mappedBy = "clube")
     private Estadio estadio;
