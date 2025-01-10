@@ -7,17 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 import com.meli.footapi.dto.EstadioDto;
 import com.meli.footapi.entity.Estadio;
-import com.meli.footapi.repository.StadiumRepo;
-
+import com.meli.footapi.repository.EstadioRepository;
 
 @Service
-public class StadiumService {
+public class EstadioService {
 
     @Autowired
-    private StadiumRepo stadiumRepo;
+    private EstadioRepository stadiumRepo;
 
     public EstadioDto createStadium(EstadioDto stadiumDto) {
         validateStadiumInput(stadiumDto);
@@ -73,8 +71,19 @@ public class StadiumService {
     }
 
 
-    private void validateStadiumInput(EstadioDto stadiumToValidate) {
-        // fazer validações que dão throw se der errado
+    private void validateStadiumInput(EstadioDto estadioParaValidar) {
+
+        String inputedName = estadioParaValidar.getName();
+        if (inputedName == null || inputedName.isBlank() || inputedName.length() < 3) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O nome do estadio deve conter no mínimo 3 letras.");
+        }
+
+        List<EstadioDto> estadiosExistentes = getStadiums();
+        estadiosExistentes.stream().forEach(estadio -> {
+            if(estadio.getName().equals(inputedName)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Um estadio de mesmo nome já está cadastrado.");
+            }
+        });
     };
 
 }

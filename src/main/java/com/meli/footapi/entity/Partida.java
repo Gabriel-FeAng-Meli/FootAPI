@@ -1,5 +1,6 @@
 package com.meli.footapi.entity;
 
+import java.time.LocalDateTime;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,6 +30,9 @@ public class Partida {
 
     @Column(nullable = false, updatable = false)
     private int golsClubeVisitante;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime dataPartida;
 
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false, updatable = false, name = "estadio_id")

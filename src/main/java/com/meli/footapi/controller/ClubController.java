@@ -3,7 +3,7 @@ package com.meli.footapi.controller;
 
 import com.meli.footapi.dto.ClubeDto;
 import com.meli.footapi.entity.Clube;
-import com.meli.footapi.service.ClubService;
+import com.meli.footapi.service.ClubeService;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ClubController {
 
     @Autowired
-    private ClubService clubService;
+    private ClubeService clubService;
 
     @PostMapping
     public ResponseEntity<ClubeDto> createClub(@RequestBody Clube club) {

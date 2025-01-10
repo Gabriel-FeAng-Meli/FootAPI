@@ -3,7 +3,7 @@ package com.meli.footapi.service;
 import com.meli.footapi.enums.ValidBrazilStates;
 import com.meli.footapi.entity.Clube;
 import com.meli.footapi.dto.ClubeDto;
-import com.meli.footapi.repository.ClubRepo;
+import com.meli.footapi.repository.ClubeRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +15,10 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
 @Service
-public class ClubService {
+public class ClubeService {
 
     @Autowired
-    private ClubRepo clubRepo;
+    private ClubeRepository clubRepo;
 
     public ClubeDto createClub(Clube clube) {
         validateClubInput(clube);

@@ -2,7 +2,7 @@ package com.meli.footapi.controller;
 
 
 import com.meli.footapi.dto.EstadioDto;
-import com.meli.footapi.service.StadiumService;
+import com.meli.footapi.service.EstadioService;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class StadiumController {
 
     @Autowired
-    private StadiumService stadiumService;
+    private EstadioService stadiumService;
 
     @PostMapping
     public ResponseEntity<EstadioDto> createStadium(@RequestBody EstadioDto stadium) {

@@ -3,7 +3,7 @@ package com.meli.footapi.controller;
 
 import com.meli.footapi.dto.PartidaDto;
 import com.meli.footapi.entity.Partida;
-import com.meli.footapi.service.MatchService;
+import com.meli.footapi.service.PartidaService;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MatchController {
 
     @Autowired
-    private MatchService matchService;
+    private PartidaService matchService;
 
     @PostMapping
     public ResponseEntity<PartidaDto> createMatch(@RequestBody Partida match) {
