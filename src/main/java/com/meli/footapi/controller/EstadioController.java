@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/estadios")
-public class StadiumController {
+public class EstadioController {
 
     @Autowired
     private EstadioService stadiumService;

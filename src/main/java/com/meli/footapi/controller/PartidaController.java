@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/partidas")
-public class MatchController {
+public class PartidaController {
 
     @Autowired
     private PartidaService matchService;

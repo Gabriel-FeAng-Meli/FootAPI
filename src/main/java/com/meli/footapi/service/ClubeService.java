@@ -2,11 +2,15 @@ package com.meli.footapi.service;
 
 import com.meli.footapi.enums.ValidBrazilStates;
 import com.meli.footapi.entity.Clube;
+import com.meli.footapi.entity.Partida;
 import com.meli.footapi.dto.ClubeDto;
+import com.meli.footapi.dto.RetrospectivaDto;
 import com.meli.footapi.repository.ClubeRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
+
 import java.util.List;
+
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +22,7 @@ import org.springframework.http.HttpStatus;
 public class ClubeService {
 
     @Autowired
-    private ClubeRepository clubRepo;
+    protected ClubeRepository clubRepo;
 
     public ClubeDto createClub(Clube clube) {
         validateClubInput(clube);
@@ -83,6 +87,15 @@ public class ClubeService {
         clubRepo.delete(clubToDelete);
 
     }
+
+    public RetrospectivaDto getRetrospectiva(int clubId, List<Partida> partidas) {
+        Clube clube = clubRepo.findById(clubId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        RetrospectivaDto retro = new RetrospectivaDto(clube, partidas);
+
+        return retro;
+    }
+
 
 
     private void validateClubInput(Clube clubToValidate) {

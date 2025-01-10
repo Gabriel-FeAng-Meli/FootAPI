@@ -2,8 +2,11 @@ package com.meli.footapi.controller;
 
 
 import com.meli.footapi.dto.ClubeDto;
+import com.meli.footapi.dto.RetrospectivaDto;
 import com.meli.footapi.entity.Clube;
+import com.meli.footapi.entity.Partida;
 import com.meli.footapi.service.ClubeService;
+import com.meli.footapi.service.PartidaService;
 
 import java.util.List;
 
@@ -18,12 +21,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
 @RestController
 @RequestMapping("/clubes")
-public class ClubController {
+public class ClubeController {
 
     @Autowired
     private ClubeService clubService;
+
+    @Autowired
+    private PartidaService partidaService;
 
     @PostMapping
     public ResponseEntity<ClubeDto> createClub(@RequestBody Clube club) {
@@ -34,6 +41,13 @@ public class ClubController {
     public ClubeDto getClubById(@PathVariable(value = "id") int clubId) {
         return clubService.getClubById(clubId);
     }
+
+    @GetMapping("/{id}/retro")
+    public RetrospectivaDto getRetrospectiva(@PathVariable(value = "id") int clubId) {
+        List<Partida> listaDePartidas = partidaService.getPartidasByClube(clubId);
+        return clubService.getRetrospectiva(clubId, listaDePartidas);
+    }
+    
 
     @GetMapping
     public List<ClubeDto> getAllClubs() {

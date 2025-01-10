@@ -83,6 +83,16 @@ public class PartidaService {
 
     }
 
+    public List<Partida> getPartidasByClube(int id) {
+        Clube clube = clubService.clubRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_GATEWAY));
+
+        List<Partida> lista = new ArrayList<>();
+
+        lista.addAll(matchRepo.findByClubeDaCasa(clube));
+        lista.addAll(matchRepo.findByClubeVisitante(clube));
+        return lista;
+    }
+
     private void validateMatchInput(Partida partidaParaValidar) throws ResponseStatusException {
         // fazer validações que dão throw se der errado
         LocalDateTime inputedDate = partidaParaValidar.getDataPartida();
