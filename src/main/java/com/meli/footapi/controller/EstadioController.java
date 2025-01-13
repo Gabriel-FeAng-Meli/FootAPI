@@ -2,7 +2,6 @@ package com.meli.footapi.controller;
 
 
 import com.meli.footapi.dto.EstadioDto;
-import com.meli.footapi.entity.Clube;
 import com.meli.footapi.entity.Estadio;
 import com.meli.footapi.service.EstadioService;
 
