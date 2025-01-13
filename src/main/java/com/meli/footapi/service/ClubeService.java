@@ -1,22 +1,24 @@
 package com.meli.footapi.service;
 
-import com.meli.footapi.enums.ValidBrazilStates;
-import com.meli.footapi.entity.Clube;
-import com.meli.footapi.entity.Partida;
-import com.meli.footapi.dto.ClubeDto;
-import com.meli.footapi.dto.RetrospectivaDto;
-import com.meli.footapi.repository.ClubeRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
-
 import java.util.List;
-
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
+
+import com.meli.footapi.dto.ClubeDto;
+import com.meli.footapi.dto.RetrospectivaDto;
+import com.meli.footapi.entity.Clube;
+import com.meli.footapi.entity.Partida;
+import com.meli.footapi.enums.ValidBrazilStates;
+import com.meli.footapi.repository.ClubeRepository;
 
 @Service
 public class ClubeService {
@@ -47,6 +49,21 @@ public class ClubeService {
     
         return dtoList;
     }
+
+  
+    public Page<Clube> findByNomeDoClube(String nome, int size, int page) {
+        Pageable paginacao = PageRequest.of(page, size);
+        Page<Clube> paginado = clubRepo.findByNomeContaining(nome, paginacao);
+
+        return paginado;
+    } 
+
+    public Page<Clube> findAll(int size, int page) {
+        Pageable paginacao = PageRequest.of(page, size);
+        Page<Clube> paginado = clubRepo.findAll(paginacao);
+
+        return paginado;
+    } 
 
     public ClubeDto getClubById(int id) {
 
@@ -86,20 +103,19 @@ public class ClubeService {
 
     }
 
-    public RetrospectivaDto getRetrospectiva(int clubId, List<Partida> partidas) {
+    public RetrospectivaDto getRetrospectiva(int clubId, List<Partida> partidas, String titulo) {
         Clube clube = clubRepo.findById(clubId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         RetrospectivaDto retro = new RetrospectivaDto(clube, partidas);
 
+        retro.setTitulo(titulo);
         return retro;
     }
 
-
-
     private void validateClubInput(Clube clubToValidate) {
         String inputedName = clubToValidate.getNome();
-        if (inputedName == null || inputedName.isBlank() || inputedName.length() < 3) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O nome do clube deve conter no mínimo 3 letras.");
+        if (inputedName == null || inputedName.isBlank() || inputedName.length() < 2) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O nome do clube deve conter no mínimo 2 letras.");
         }
 
         String inputedState = clubToValidate.getEstado();

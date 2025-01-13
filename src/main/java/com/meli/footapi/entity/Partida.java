@@ -1,14 +1,17 @@
 package com.meli.footapi.entity;
 
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Data
 @Table(name = "partidas")
 public class Partida {
@@ -37,5 +40,8 @@ public class Partida {
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false, updatable = false, name = "estadio_id")
     private Estadio estadio;
+
+    @JsonIgnore
+    private boolean goleada = golsClubeDaCasa - golsClubeVisitante >= 3 || golsClubeVisitante - golsClubeDaCasa >= 3;
 
 }

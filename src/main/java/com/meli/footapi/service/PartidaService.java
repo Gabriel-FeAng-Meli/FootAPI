@@ -5,13 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.meli.footapi.dto.ClubeDto;
+import com.meli.footapi.dto.EstadioDto;
 import com.meli.footapi.dto.PartidaDto;
 import com.meli.footapi.entity.Clube;
+import com.meli.footapi.entity.Estadio;
 import com.meli.footapi.entity.Partida;
 import com.meli.footapi.repository.PartidaRepository;
 
@@ -25,8 +30,15 @@ public class PartidaService {
     @Autowired
     private ClubeService clubService;
 
+    @Autowired
+    private EstadioService estadioService;
+
     public PartidaDto createMatch(Partida partida) {
         validateMatchInput(partida);
+
+        if (partida.getGolsClubeDaCasa() - partida.getGolsClubeVisitante() >= 3 || partida.getGolsClubeVisitante() - partida.getGolsClubeDaCasa() >= 3) {
+            partida.setGoleada(true);
+        }
 
         matchRepo.save(partida);
 
@@ -35,16 +47,34 @@ public class PartidaService {
         return getMatchById(id);
     }
 
-    public List<PartidaDto> getMatchs() {
-        List<PartidaDto> dtoList = new ArrayList<>();
-        List<Partida> matchList = matchRepo.findAll();
-    
-        for (int i = 0; i < matchList.size(); i++) {
-            Partida c = matchList.get(i);
-            dtoList.add(PartidaDto.partidaToDto(c));
-        }
 
-        return dtoList;
+    public Page<Partida> getPagedPartidaByGoleada(boolean goleada, int page, int size) {
+        Pageable paginacao = PageRequest.of(page, size);
+        Page<Partida> partidas = matchRepo.findByGoleada(goleada, paginacao);
+
+        return partidas;
+    }
+
+    public Page<Partida> getPagedByNomeClubeDaCasa(String nome, int page, int size) {
+        Pageable paginacao = PageRequest.of(page, size);
+        Page<Partida> partidas = matchRepo.findByClubeDaCasaNomeContains(nome, paginacao);
+
+        return partidas;
+    }
+
+
+    public Page<Partida> getPagedByNomeClubeVisitante(String nome, int page, int size) {
+        Pageable paginacao = PageRequest.of(page, size);
+        Page<Partida> partidas = matchRepo.findByClubeVisitanteNomeContains(nome, paginacao);
+
+        return partidas;
+    }
+
+    public Page<Partida> getPagedPartidas(int page, int size) {
+        Pageable paginacao = PageRequest.of(page, size);
+        Page<Partida> partidas = matchRepo.findAll(paginacao);
+
+        return partidas;
     }
 
     public PartidaDto getMatchById(int id) {
@@ -68,6 +98,10 @@ public class PartidaService {
         partida.setGolsClubeVisitante(dadosAtualizados.getGolsClubeVisitante());
         partida.setEstadio(dadosAtualizados.getEstadio());
 
+        if (partida.getGolsClubeDaCasa() - partida.getGolsClubeVisitante() >= 3 || partida.getGolsClubeVisitante() - partida.getGolsClubeDaCasa() >= 3) {
+            partida.setGoleada(true);
+        }
+
         matchRepo.save(partida);
 
         return PartidaDto.partidaToDto(partida);
@@ -81,9 +115,7 @@ public class PartidaService {
 
     }
 
-    public List<Partida> getPartidasByClube(int id) {
-        Clube clube = clubService.clubRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_GATEWAY));
-
+    public List<Partida> getPartidasByClube(Clube clube) {
         List<Partida> lista = new ArrayList<>();
 
         lista.addAll(matchRepo.findByClubeDaCasa(clube));
@@ -91,15 +123,39 @@ public class PartidaService {
         return lista;
     }
 
+    public List<Partida> getPartidasEntreDoisClubes(Clube clubeUm, Clube clubeDois) {
+        
+        List<Partida> partidasClubeUm = matchRepo.findByClubeDaCasa(clubeUm);
+        partidasClubeUm.addAll(matchRepo.findByClubeVisitante(clubeUm));
+        
+        List<Partida> partidasClubeDois = matchRepo.findByClubeDaCasa(clubeDois);
+        partidasClubeDois.addAll(matchRepo.findByClubeVisitante(clubeDois));
+        
+        List<Partida> partidasEntreOsClubes = partidasClubeUm.stream().filter(partidasClubeDois::contains).toList();
+
+        return partidasEntreOsClubes;
+    }
+
     private void validateMatchInput(Partida partidaParaValidar) throws ResponseStatusException {
-        // fazer validações que dão throw se der errado
         LocalDateTime inputedDate = partidaParaValidar.getDataPartida();
         
         Clube clubeDaCasaInput = partidaParaValidar.getClubeDaCasa();
 
         Clube clubeDaCasa = ClubeDto.dtoToClube(clubService.getClubById(clubeDaCasaInput.getId()));
+
+        int idClubeDaCasa = clubeDaCasa.getId();
+
+        Estadio estadioComIdDoInput = EstadioDto.dtoToEstadio(estadioService.getStadiumById(partidaParaValidar.getEstadio().getId()));
+
+        int idClubeAssociadoAoEstadio = estadioComIdDoInput.getClube().getId();
+
+        if (idClubeAssociadoAoEstadio != idClubeDaCasa) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O id do estadio inserido não é do estadio pertencente ao clube " + clubeDaCasa.getNome());
+        }
+
         LocalDateTime dataCriaçãoClubeDaCasa = clubeDaCasa.getDataDeCriacao().atStartOfDay();
-        List<Partida> partidasClubeDaCasa = matchRepo.findByClubeDaCasa(clubeDaCasaInput);
+        List<Partida> partidasClubeDaCasa = matchRepo.findByClubeDaCasa(clubeDaCasa);
+
 
         partidasClubeDaCasa.forEach(p -> {
             LocalDateTime usedDate = p.getDataPartida();

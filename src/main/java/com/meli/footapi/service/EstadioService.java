@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import com.meli.footapi.dto.EstadioDto;
+import com.meli.footapi.entity.Clube;
 import com.meli.footapi.entity.Estadio;
 import com.meli.footapi.repository.EstadioRepository;
 
@@ -16,6 +20,9 @@ public class EstadioService {
 
     @Autowired
     private EstadioRepository stadiumRepo;
+
+    @Autowired
+    private ClubeService clubeService;
 
     public EstadioDto createStadium(Estadio stadium) {
         validateStadiumInput(stadium);
@@ -36,6 +43,21 @@ public class EstadioService {
 
         return dtoList;
     }
+
+    public Page<Estadio> findByNome(String nome, int size, int page) {
+        Pageable paginacao = PageRequest.of(page, size);
+        Page<Estadio> paginado = stadiumRepo.findByNome(nome, paginacao);
+
+        return paginado;
+    } 
+
+    public Page<Estadio> findAll(int size, int page) {
+        Pageable paginacao = PageRequest.of(page, size);
+        Page<Estadio> paginado = stadiumRepo.findAll(paginacao);
+
+        return paginado;
+    } 
+
 
     public EstadioDto getStadiumById(int id) {
 
@@ -71,6 +93,13 @@ public class EstadioService {
 
 
     private void validateStadiumInput(Estadio estadioParaValidar) {
+
+        Clube clubeAssociado = estadioParaValidar.getClube();
+        try {
+            clubeService.getClubById(clubeAssociado.getId());
+        } catch (ResponseStatusException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O estadio precisa estar vinculado a um clube existente e ativo.");
+        }
 
         String inputedName = estadioParaValidar.getNome();
         if (inputedName == null || inputedName.isBlank() || inputedName.length() < 3) {
