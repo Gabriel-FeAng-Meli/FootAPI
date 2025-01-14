@@ -2,7 +2,10 @@ package com.meli.footapi.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +13,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.meli.footapi.dto.ClubeDto;
+import com.meli.footapi.dto.RankingDto;
 import com.meli.footapi.dto.RetrospectivaDto;
 import com.meli.footapi.entity.Clube;
 import com.meli.footapi.entity.Partida;
@@ -26,6 +31,9 @@ public class ClubeService {
     @Autowired
     protected ClubeRepository clubRepo;
 
+    @Autowired
+    protected PartidaService partidaService;
+
     public ClubeDto createClub(Clube clube) {
         validateClubInput(clube);
         clubRepo.save(clube);
@@ -35,19 +43,28 @@ public class ClubeService {
         return getClubById(id);
     }
 
-    public List<ClubeDto> getClubs() {
+    public Map<String, Object> getPaginatedClubs(@Nullable String nome, int page, int size) {
+        try {
+            List<Clube> clubes = new ArrayList<Clube>();
+            Page<Clube> paginaClube;
+            if(nome == null)
+                paginaClube = findAll(size, page);
+            else {
+                paginaClube = findByNomeDoClube(nome, size, page);
+            }
 
-        ModelMapper mapper = new ModelMapper();
-        List<Clube> clubList = clubRepo.findAll();
+            clubes = paginaClube.getContent();
 
-        List<ClubeDto> dtoList = new ArrayList<>();
+            Map<String, Object> response = new HashMap<>();
+            response.put("Clubes", clubes);
+            response.put("paginaAtual", paginaClube.getNumber() + 1);
+            response.put("totalDeItens", paginaClube.getTotalElements());
+            response.put("totalDePaginas", paginaClube.getTotalPages());
 
-        clubList.forEach(clube -> {
-            ClubeDto dto = mapper.map(clube, ClubeDto.class);
-            dtoList.add(dto);
-        });
-    
-        return dtoList;
+            return response;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não foi possivel realizar a busca com os parametros fornecidos");
+        }
     }
 
   
@@ -103,22 +120,100 @@ public class ClubeService {
 
     }
 
-    public RetrospectivaDto getRetrospectiva(int clubId, List<Partida> partidas, String titulo) {
-        Clube clube = clubRepo.findById(clubId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public RetrospectivaDto getRetrospectiva(int clubId) {
+        Clube clube = ClubeDto.dtoToClube(getClubById(clubId));
+        String titulo = clube.getNome() + "-" + clube.getEstado();
 
-        RetrospectivaDto retro = new RetrospectivaDto(clube, partidas);
-
+        List<Partida> listaDePartidas = partidaService.getPartidasByClube(clube);
+        
+        RetrospectivaDto retro = new RetrospectivaDto(clube, listaDePartidas);
         retro.setTitulo(titulo);
+
         return retro;
     }
 
-    private void validateClubInput(Clube clubToValidate) {
-        String inputedName = clubToValidate.getNome();
-        if (inputedName == null || inputedName.isBlank() || inputedName.length() < 2) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O nome do clube deve conter no mínimo 2 letras.");
+    public RetrospectivaDto getConfrontosDiretos(int clubId, int otherClubId) {
+        Clube clubeUm = ClubeDto.dtoToClube(getClubById(clubId));
+        Clube clubeDois = ClubeDto.dtoToClube(getClubById(otherClubId));
+        
+        String titulo = clubeUm.getNome() + "-" + clubeUm.getEstado() + " X " + clubeDois.getNome() + "-" + clubeDois.getEstado();
+        
+        RetrospectivaDto retro = getRetrospectiva(clubId);
+        retro.setTitulo(titulo);
+
+        return retro;
+    }
+    
+    public List<RetrospectivaDto> getRetrospectivaParaCadaAdversario(int clubId) {
+        Clube clube = ClubeDto.dtoToClube(getClubById(clubId));
+        
+        Set<Integer> idTimesEnfrentados = RetrospectivaDto.getTimesEnfrentadosPorClube(clube, partidaService.getPartidasByClube(clube));
+        
+        List<RetrospectivaDto> retrospectivas = new ArrayList<>();
+        
+        idTimesEnfrentados.stream().forEach(id -> {
+            retrospectivas.add(getConfrontosDiretos(clubId, id));
+        });
+
+        return retrospectivas;
+    }
+
+    public List<RankingDto> getRanking() {
+        List<RankingDto> unsortedRanking= new ArrayList<>();
+        
+        List<ClubeDto> todosOsClubes = getClubs();
+
+        todosOsClubes.forEach(clube -> {
+            int id = clube.getId();
+            RetrospectivaDto retro = getRetrospectiva(id);
+            RankingDto rank = new RankingDto();
+            rank.setClube(clube);
+            rank.setPontuacao(retro.getPontuação());
+
+            unsortedRanking.add(rank);
+        });
+
+        List<RankingDto> ranking = unsortedRanking.stream().sorted((r1, r2) -> Integer.compare(r2.getPontuacao(), r1.getPontuacao())).filter(rank -> rank.getPontuacao() != 0).toList();
+
+        for (int i = 0; i < ranking.size(); i++) {
+            ranking.get(i).setRank(i + 1);
         }
 
-        String inputedState = clubToValidate.getEstado();
+        return ranking;
+    }
+
+    public List<ClubeDto> getClubs() {
+        ModelMapper mapper = new ModelMapper();
+        List<Clube> clubList = clubRepo.findAll();
+
+        List<ClubeDto> dtoList = new ArrayList<>();
+
+        clubList.forEach(clube -> {
+            ClubeDto dto = mapper.map(clube, ClubeDto.class);
+            dtoList.add(dto);
+        });
+        return dtoList;
+    }
+
+
+    private void validateClubInput(Clube clubToValidate) {
+
+        String nomeDoClube = clubToValidate.getNome();
+        String estadoDoClube = clubToValidate.getEstado();
+        validateClubName(nomeDoClube);
+        validateClubState(estadoDoClube);
+        validateClubDate(clubToValidate.getDataDeCriacao());
+        checkIfClubAlreadyExists(getClubs(), nomeDoClube, estadoDoClube);
+    }
+
+
+    private void validateClubDate(LocalDate inputedDate) {
+        if (inputedDate != null && inputedDate.isAfter(LocalDate.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A data de criação do clube não pode ser no futuro. Insira uma data valida no formato YYYY-MM-DD");
+        }
+    }
+
+    private void validateClubState(String inputedState) {
         boolean validState = false;
         for (ValidBrazilStates state : ValidBrazilStates.values()) {
             if (inputedState != null && state.toString().equals(inputedState.toUpperCase())) {
@@ -127,21 +222,20 @@ public class ClubeService {
         }
         if (!validState) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O estado escolhido não é um estado real do Brasil. Favor utilizar a sigla de um estado existente (exemplo: SP)");
-        }
+        };
+    }
 
-        LocalDate inputedDate = clubToValidate.getDataDeCriacao();
-        if (inputedDate != null && inputedDate.isAfter(LocalDate.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A data de criação do clube não pode ser no futuro. Insira uma data valida no formato YYYY-MM-DD");
+    private void validateClubName(String inputedName) {
+        if (inputedName == null || inputedName.isBlank() || inputedName.length() < 2) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O nome do clube deve conter no mínimo 2 letras.");
         }
+    }
 
-        List<ClubeDto> existingClubs = getClubs();
+    private void checkIfClubAlreadyExists(List<ClubeDto> existingClubs, String inputedName, String inputedState) {
         existingClubs.stream().forEach(existingClub -> {
             if(existingClub.getNome().equals(inputedName) && existingClub.getEstado().equals(inputedState)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Um clube de mesmo nome e mesmo estado já está cadastrado.");
             }
         });
-
-
     }
-
 }
