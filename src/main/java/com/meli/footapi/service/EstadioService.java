@@ -1,7 +1,9 @@
 package com.meli.footapi.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,30 +13,30 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import com.meli.footapi.dto.EstadioDto;
-import com.meli.footapi.entity.Clube;
 import com.meli.footapi.entity.Estadio;
 import com.meli.footapi.repository.EstadioRepository;
+import com.meli.footapi.validation.EstadioValidation;
 
 @Service
 public class EstadioService {
 
     @Autowired
-    private EstadioRepository stadiumRepo;
+    private EstadioRepository estadioRepository;
 
     @Autowired
-    private ClubeService clubeService;
+    private EstadioValidation estadioValidation;
 
     public EstadioDto createStadium(Estadio stadium) {
-        validateStadiumInput(stadium);
+        estadioValidation.validateStadiumInput(stadium);
 
-        stadiumRepo.save(stadium);
+        estadioRepository.save(stadium);
 
         return getStadiumById(stadium.getId());
     }
 
     public List<EstadioDto> getStadiums() {
         List<EstadioDto> dtoList = new ArrayList<>();
-        List<Estadio> stadiumList = stadiumRepo.findAll();
+        List<Estadio> stadiumList = estadioRepository.findAll();
     
         for (int i = 0; i < stadiumList.size(); i++) {
             Estadio c = stadiumList.get(i);
@@ -46,14 +48,14 @@ public class EstadioService {
 
     public Page<Estadio> findByNome(String nome, int size, int page) {
         Pageable paginacao = PageRequest.of(page, size);
-        Page<Estadio> paginado = stadiumRepo.findByNome(nome, paginacao);
+        Page<Estadio> paginado = estadioRepository.findByNome(nome, paginacao);
 
         return paginado;
     } 
 
     public Page<Estadio> findAll(int size, int page) {
         Pageable paginacao = PageRequest.of(page, size);
-        Page<Estadio> paginado = stadiumRepo.findAll(paginacao);
+        Page<Estadio> paginado = estadioRepository.findAll(paginacao);
 
         return paginado;
     } 
@@ -61,7 +63,7 @@ public class EstadioService {
 
     public EstadioDto getStadiumById(int id) {
 
-        Estadio stadium = this.stadiumRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+        Estadio stadium = this.estadioRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
         "Não foi encontrado nenhum estádio com o ID " + id));
 
         EstadioDto dto = EstadioDto.estadioToDto(stadium);
@@ -70,13 +72,15 @@ public class EstadioService {
     }
 
     public EstadioDto updateStadium(int id, Estadio updatedStadiumInfo) {
-        Estadio estadio = stadiumRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estadio não encontrado para realizar a alteração. Utilize um id de um estadio já cadastrado para realizar uma alteração."));
+        Estadio estadio = estadioRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estadio não encontrado para realizar a alteração. Utilize um id de um estadio já cadastrado para realizar uma alteração."));
 
         estadio.setId(id);
         estadio.setNome(updatedStadiumInfo.getNome());
         estadio.setClube(updatedStadiumInfo.getClube());
 
-        stadiumRepo.save(estadio);
+        estadioValidation.validateStadiumInput(estadio);
+
+        estadioRepository.save(estadio);
 
         EstadioDto dto = EstadioDto.estadioToDto(estadio);
 
@@ -84,47 +88,35 @@ public class EstadioService {
     }
 
     public void deleteStadium(int id) {
-        Estadio stadiumToDelete = stadiumRepo.findById(id)
+        Estadio stadiumToDelete = estadioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Não foi encontrado nenhum estádio com o ID " + id));
 
-        stadiumRepo.delete(stadiumToDelete);
+        estadioRepository.delete(stadiumToDelete);
 
     }
 
-
-    private void validateStadiumInput(Estadio estadioParaValidar) {
-
-        Clube clubeAssociado = estadioParaValidar.getClube();
-        validateHomeClub(clubeAssociado);
-
-        String inputedName = estadioParaValidar.getNome();
-        validateStadiumName(inputedName);
-
-        List<EstadioDto> estadiosExistentes = getStadiums();
-        checkIfStadiumAlreadyExists(inputedName, estadiosExistentes);
-    }
-
-    private void checkIfStadiumAlreadyExists(String inputedName, List<EstadioDto> estadiosExistentes) {
-        estadiosExistentes.stream().forEach(estadio -> {
-            if(estadio.getNome().equals(inputedName)) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Um estadio de mesmo nome já está cadastrado.");
-            }
-        });
-    }
-
-    private void validateStadiumName(String inputedName) {
-        if (inputedName == null || inputedName.isBlank() || inputedName.length() < 3) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O nome do estadio deve conter no mínimo 3 letras.");
-        }
-    };
-
-    private void validateHomeClub(Clube clubeAssociado) {
+    public Map<String, Object> paginarEstadios(String nome, int pagina, int limite) {
         try {
-            clubeService.getClubById(clubeAssociado.getId());
-        } catch (ResponseStatusException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O estadio precisa estar vinculado a um clube existente e ativo.");
+            List<Estadio> estadios = new ArrayList<Estadio>();
+            Page<Estadio> paginaEstadio;
+            if(nome == null)
+                paginaEstadio = findAll(limite, pagina);
+            else {
+                paginaEstadio = findByNome(nome, limite, pagina);
+            }
+
+            estadios = paginaEstadio.getContent();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("Estadios", estadios);
+            response.put("paginaAtual", paginaEstadio.getNumber() + 1);
+            response.put("totalDeItens", paginaEstadio.getTotalElements());
+            response.put("totalDePaginas", paginaEstadio.getTotalPages());
+
+            return response;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não foi possivel realizar a busca com os parametros fornecidos");
         }
     }
-
 }
 
