@@ -12,12 +12,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.meli.footapi.dto.ClubeDto;
 import com.meli.footapi.dto.EstadioDto;
 import com.meli.footapi.dto.PartidaDto;
 import com.meli.footapi.entity.Clube;
 import com.meli.footapi.entity.Estadio;
 import com.meli.footapi.entity.Partida;
+import com.meli.footapi.repository.ClubeRepository;
 import com.meli.footapi.repository.PartidaRepository;
 
 
@@ -28,7 +28,7 @@ public class PartidaService {
     private PartidaRepository matchRepo;
 
     @Autowired
-    private ClubeService clubService;
+    private ClubeRepository clubRepo;
 
     @Autowired
     private EstadioService estadioService;
@@ -138,8 +138,8 @@ public class PartidaService {
 
     private void validateMatchInput(Partida partidaParaValidar) throws ResponseStatusException {
         LocalDateTime dataPartida = partidaParaValidar.getDataPartida();
-        Clube clubeDaCasa = ClubeDto.dtoToClube(clubService.getClubById(partidaParaValidar.getClubeDaCasa().getId()));
-        Clube clubeVisitante = ClubeDto.dtoToClube(clubService.getClubById(partidaParaValidar.getClubeVisitante().getId()));
+        Clube clubeDaCasa = clubRepo.findById(partidaParaValidar.getClubeDaCasa().getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Clube clubeVisitante = clubRepo.findById(partidaParaValidar.getClubeDaCasa().getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         Estadio estadio = EstadioDto.dtoToEstadio(estadioService.getStadiumById(partidaParaValidar.getEstadio().getId()));
         
         validateDonoDoEstadio(clubeDaCasa, estadio.getId());
