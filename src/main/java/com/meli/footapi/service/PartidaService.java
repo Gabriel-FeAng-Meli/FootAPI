@@ -137,39 +137,39 @@ public class PartidaService {
     }
 
     private void validateMatchInput(Partida partidaParaValidar) throws ResponseStatusException {
-        LocalDateTime inputedDate = partidaParaValidar.getDataPartida();
+        LocalDateTime dataPartida = partidaParaValidar.getDataPartida();
+        Clube clubeDaCasa = ClubeDto.dtoToClube(clubService.getClubById(partidaParaValidar.getClubeDaCasa().getId()));
+        Clube clubeVisitante = ClubeDto.dtoToClube(clubService.getClubById(partidaParaValidar.getClubeVisitante().getId()));
+        Estadio estadio = EstadioDto.dtoToEstadio(estadioService.getStadiumById(partidaParaValidar.getEstadio().getId()));
         
-        Clube clubeDaCasaInput = partidaParaValidar.getClubeDaCasa();
+        validateDonoDoEstadio(clubeDaCasa, estadio.getId());
+        validateEstadioDate(dataPartida, estadio);
+        validateClubeDaCasaDate(dataPartida, clubeDaCasa);
+        validateClubeVisitanteDate(dataPartida, clubeVisitante);
+    }
+    
 
-        Clube clubeDaCasa = ClubeDto.dtoToClube(clubService.getClubById(clubeDaCasaInput.getId()));
 
-        int idClubeDaCasa = clubeDaCasa.getId();
-
-        Estadio estadioComIdDoInput = EstadioDto.dtoToEstadio(estadioService.getStadiumById(partidaParaValidar.getEstadio().getId()));
-
-        int idClubeAssociadoAoEstadio = estadioComIdDoInput.getClube().getId();
-
-        if (idClubeAssociadoAoEstadio != idClubeDaCasa) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O id do estadio inserido não é do estadio pertencente ao clube " + clubeDaCasa.getNome());
-        }
-
+    private void validateClubeDaCasaDate(LocalDateTime dataEHoraDaPartida, Clube clubeDaCasa) {
         LocalDateTime dataCriaçãoClubeDaCasa = clubeDaCasa.getDataDeCriacao().atStartOfDay();
         List<Partida> partidasClubeDaCasa = matchRepo.findByClubeDaCasa(clubeDaCasa);
 
+        if(dataCriaçãoClubeDaCasa.isAfter(dataEHoraDaPartida)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A partida só pode ocorrer em uma data posterior à criação de ambos os clubes!");
+        }
 
         partidasClubeDaCasa.forEach(p -> {
             LocalDateTime usedDate = p.getDataPartida();
             LocalDateTime superiorMargin = usedDate.plusHours(48);
             LocalDateTime inferiorMargin = usedDate.minusHours(48);
 
-            if(inputedDate.isAfter(inferiorMargin) && inputedDate.isBefore(superiorMargin)) {
+            if(dataEHoraDaPartida.isAfter(inferiorMargin) && dataEHoraDaPartida.isBefore(superiorMargin)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Cada clube só pode jogar uma partida a cada 48h. O Clube da Casa já tem uma partida cadastrada em " + usedDate);
             }
         });
-        
-        Clube clubeVisitanteInput = partidaParaValidar.getClubeVisitante();
+    }
 
-        Clube clubeVisitante = ClubeDto.dtoToClube(clubService.getClubById(clubeVisitanteInput.getId()));
+    private void validateClubeVisitanteDate(LocalDateTime dataEHoraDaPartida, Clube clubeVisitante) {
         LocalDateTime dataCriaçãoClubeVisitante = clubeVisitante.getDataDeCriacao().atStartOfDay();
         List<Partida> partidasClubeVisitante = matchRepo.findByClubeVisitante(clubeVisitante);
 
@@ -178,27 +178,39 @@ public class PartidaService {
             LocalDateTime superiorMargin = usedDate.plusHours(48);
             LocalDateTime inferiorMargin = usedDate.minusHours(48);
 
-            if(inputedDate.isAfter(inferiorMargin) && inputedDate.isBefore(superiorMargin)) {
+            if(dataEHoraDaPartida.isAfter(inferiorMargin) && dataEHoraDaPartida.isBefore(superiorMargin)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Cada clube só pode jogar uma partida a cada 48h. O Clube Visitante já tem uma partida cadastrada em " + usedDate);
             }
         });
 
-        if(dataCriaçãoClubeDaCasa.isAfter(inputedDate) || dataCriaçãoClubeVisitante.isAfter(inputedDate)) {
+        if(dataCriaçãoClubeVisitante.isAfter(dataEHoraDaPartida)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A partida só pode ocorrer em uma data posterior à criação de ambos os clubes!");
         }
 
-        List<Partida> partidasNoEstadio = matchRepo.findByEstadio(partidaParaValidar.getEstadio());
+    }
+        
+
+    private void validateEstadioDate(LocalDateTime dataEHoraDaPartida, Estadio estadioDaPartida) {
+
+        List<Partida> partidasNoEstadio = matchRepo.findByEstadio(estadioDaPartida);
 
         partidasNoEstadio.forEach(p -> {
             LocalDateTime usedDate = p.getDataPartida();
             LocalDateTime superiorMargin = usedDate.plusHours(24);
             LocalDateTime inferiorMargin = usedDate.minusHours(24);
 
-            if(inputedDate.isAfter(inferiorMargin) && inputedDate.isBefore(superiorMargin)) {
+            if(dataEHoraDaPartida.isAfter(inferiorMargin) && dataEHoraDaPartida.isBefore(superiorMargin)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Só pode existir uma partida cadastrada por dia em cada estádio.");
             }
         });
+    }
 
+
+    private void validateDonoDoEstadio(Clube clubeDaCasa, int idClubeAssociadoAoEstadio) {
+        int idClubeDaCasa = clubeDaCasa.getId();
+        if (idClubeAssociadoAoEstadio != idClubeDaCasa) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O id do estadio inserido não é do estadio pertencente ao clube " + clubeDaCasa.getNome());
+        }
     };
 
 }

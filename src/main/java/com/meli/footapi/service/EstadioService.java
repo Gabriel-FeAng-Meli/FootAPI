@@ -95,24 +95,36 @@ public class EstadioService {
     private void validateStadiumInput(Estadio estadioParaValidar) {
 
         Clube clubeAssociado = estadioParaValidar.getClube();
-        try {
-            clubeService.getClubById(clubeAssociado.getId());
-        } catch (ResponseStatusException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O estadio precisa estar vinculado a um clube existente e ativo.");
-        }
+        validateHomeClub(clubeAssociado);
 
         String inputedName = estadioParaValidar.getNome();
-        if (inputedName == null || inputedName.isBlank() || inputedName.length() < 3) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O nome do estadio deve conter no mínimo 3 letras.");
-        }
+        validateStadiumName(inputedName);
 
         List<EstadioDto> estadiosExistentes = getStadiums();
+        checkIfStadiumAlreadyExists(inputedName, estadiosExistentes);
+    }
+
+    private void checkIfStadiumAlreadyExists(String inputedName, List<EstadioDto> estadiosExistentes) {
         estadiosExistentes.stream().forEach(estadio -> {
             if(estadio.getNome().equals(inputedName)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Um estadio de mesmo nome já está cadastrado.");
             }
         });
+    }
+
+    private void validateStadiumName(String inputedName) {
+        if (inputedName == null || inputedName.isBlank() || inputedName.length() < 3) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O nome do estadio deve conter no mínimo 3 letras.");
+        }
     };
+
+    private void validateHomeClub(Clube clubeAssociado) {
+        try {
+            clubeService.getClubById(clubeAssociado.getId());
+        } catch (ResponseStatusException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O estadio precisa estar vinculado a um clube existente e ativo.");
+        }
+    }
 
 }
 
