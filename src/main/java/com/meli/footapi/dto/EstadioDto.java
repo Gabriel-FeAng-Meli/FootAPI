@@ -14,7 +14,6 @@ public class EstadioDto {
     private Clube clube;
 
     public static EstadioDto estadioToDto(Estadio estadio) {
-
         EstadioDto estadioDto = new EstadioDto(estadio.getId(), estadio.getNome(), estadio.getClube());
 
         return estadioDto;

@@ -19,10 +19,9 @@ public class ClubeDto {
     private String estado;
     private boolean ativo;
     private LocalDate dataDeCriacao;
+    private static ModelMapper mapper = new ModelMapper();
 
-    public static Clube dtoToClube(ClubeDto dto) {
-        ModelMapper mapper = new ModelMapper();
-        
+    public static Clube dtoToClube(ClubeDto dto) {        
         Clube clube = mapper.map(dto, Clube.class);
 
         return clube;
@@ -30,8 +29,6 @@ public class ClubeDto {
 
 
     public static ClubeDto clubeToDto(Clube clube) {
-        ModelMapper mapper = new ModelMapper();
-
         ClubeDto clubeDto = mapper.map(clube, ClubeDto.class);
 
         return clubeDto;

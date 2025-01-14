@@ -22,61 +22,47 @@ public class RetrospectivaDto {
     private int vitorias;
     private int empates;
     private int derrotas;
-    private int partidasJogadas;
+    private int totalDePartidas;
     private int pontuação;
 
     public RetrospectivaDto(Clube clube, List<Partida> partidasJogadas) {        
-
-        int vitorias = 0;
-        int derrotas = 0;
-        int empates = 0;
-        int golsFeitos = 0;
-        int golsRecebidos = 0; 
-
-        final int idClube = clube.getId();
-
-        for (int i = 0; i < partidasJogadas.size(); i++) {
-            Partida p = partidasJogadas.get(i);
-            final int idCasa = p.getClubeDaCasa().getId();
-            int golsCasa = p.getGolsClubeDaCasa();
-            final int idVisitante = p.getClubeVisitante().getId();
-            int golsVisitante = p.getGolsClubeVisitante();
-
-            if (idClube == idCasa) {
-                golsFeitos += golsCasa;
-                golsRecebidos += golsVisitante;
-                if (golsFeitos > golsRecebidos) {
-                    vitorias += 1;
-                } else if (golsFeitos == golsRecebidos) {
-                    empates += 1;
-                } else {
-                    derrotas += 1;
-                }
-            }
-
-            if (idClube == idVisitante) {
-                golsFeitos += golsVisitante;
-                golsRecebidos += golsCasa;
-                if (golsFeitos > golsRecebidos) {
-                    vitorias += 1;
-                } else if (golsFeitos == golsRecebidos) {
-                    empates += 1;
-                } else {
-                    derrotas += 1;
-                }
-            }
-        }
-
         this.titulo = "Retrospectiva " + clube.getNome() + " - " + clube.getEstado();
-        this.derrotas = derrotas;
-        this.empates = empates;
-        this.vitorias = vitorias;
-        this.golsFeitos = golsFeitos;
-        this.golsRecebidos = golsRecebidos;
-        this.partidasJogadas = vitorias + derrotas + empates;
-        int pontos = (vitorias * 3) + empates;
-        this.pontuação = pontos;
+
+        partidasJogadas.stream().forEach(partida -> {
+            getResultadoDaPartida(clube.getId(), partida);
+        });
+
     }
+
+    public void getResultadoDaPartida(int idClube, Partida partida) {
+        final int idClubeDaCasaNaPartida = partida.getClubeDaCasa().getId();
+
+        int golsCasa = partida.getGolsClubeDaCasa();
+        int golsVisitante = partida.getGolsClubeVisitante();
+
+        if (idClube == idClubeDaCasaNaPartida) {
+            this.golsFeitos += golsCasa;
+            this.golsRecebidos += golsVisitante;
+            addResultados(golsCasa, golsVisitante);       
+        } else {
+            this.golsFeitos += golsVisitante;
+            this.golsRecebidos += golsCasa;
+            addResultados(golsCasa, golsVisitante);
+        }
+    }
+
+    public void addResultados(int golsDoClube, int golsDoAdversario) {
+        this.totalDePartidas += 1;
+        if (golsDoClube > golsDoAdversario) {
+            this.vitorias += 1;
+            this.pontuação += 3;
+        } else if (golsDoClube == golsDoAdversario) {
+            this.empates += 1;
+            this.pontuação += 1;
+        } else {
+            this.derrotas += 1;
+        }
+    } 
 
     public static Set<Integer> getTimesEnfrentadosPorClube(Clube clube, List<Partida> partidasJogadas) {
         Set<Integer> listaDeTimesEnfrentados = new HashSet<>();
