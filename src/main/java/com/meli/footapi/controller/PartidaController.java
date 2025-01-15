@@ -38,13 +38,13 @@ public class PartidaController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getPartidasPaginadas(
-        @RequestParam(required = false) Boolean goleada, 
+        @RequestParam(required = false) Boolean isGoleada, 
         @RequestParam(required = false) String clubeDaCasa,
         @RequestParam(required = false) String clubeVisitante,
         @RequestParam(defaultValue = "0") int pagina, 
         @RequestParam(defaultValue = "5") int limite) {
 
-        return ResponseEntity.ok(partidaService.paginarPartidas(goleada, clubeDaCasa, clubeVisitante, pagina, limite));
+        return ResponseEntity.ok(partidaService.paginarPartidas(isGoleada, clubeDaCasa, clubeVisitante, pagina, limite));
     }
 
     @PutMapping("/{id}")

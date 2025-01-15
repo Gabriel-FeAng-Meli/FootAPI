@@ -18,6 +18,8 @@ public interface PartidaRepository extends JpaRepository<Partida, Integer>{
 
     public List<Partida> findByClubeDaCasa(Clube clubeDaCasa);
 
+    public Partida findById(int id);
+
     public List<Partida> findByClubeVisitante(Clube clubeVisitante);
 
     Page<Partida> findByClubeDaCasaNomeContains(String nome, Pageable pageable);

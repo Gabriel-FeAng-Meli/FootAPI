@@ -1,10 +1,6 @@
 package com.meli.footapi.controller;
 
 
-import com.meli.footapi.dto.ClubeDto;
-import com.meli.footapi.entity.Clube;
-import com.meli.footapi.service.ClubeService;
-
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.meli.footapi.dto.ClubeDto;
+import com.meli.footapi.entity.Clube;
+import com.meli.footapi.service.ClubeService;
 
 @RestController
 @RequestMapping("/clubes")

@@ -32,24 +32,18 @@ public class PartidaService {
     public PartidaDto createPartida(Partida partida) {
         partidaValidation.validateMatchInput(partida);
 
-        if (partida.getGolsClubeDaCasa() - partida.getGolsClubeVisitante() >= 3 || partida.getGolsClubeVisitante() - partida.getGolsClubeDaCasa() >= 3) {
-            partida.setGoleada(true);
-        }
-
         partidaRepository.save(partida);
 
-        int id = partida.getId();
-
-        return getMatchById(id);
+        return PartidaDto.partidaToDto(partida);
     }
 
-    public Map<String, Object> paginarPartidas(Boolean goleada, String nomeClubeDaCasa, String nomeClubeVisitante, int pagina, int limite) {
+    public Map<String, Object> paginarPartidas(Boolean isGoleada, String nomeClubeDaCasa, String nomeClubeVisitante, int pagina, int limite) {
         try {
             Map<String, Object> response = new HashMap<>();
 
             Page<Partida> paginaPartida;
-            if(goleada != null)
-                paginaPartida = getPartidasPaginadasByGoleada(goleada, pagina, limite);
+            if(isGoleada != null)
+                paginaPartida = getPartidasPaginadasByGoleada(isGoleada, pagina, limite);
             else if(nomeClubeDaCasa != null)
                 paginaPartida = getPartidasPaginadasByNomeDoClubeDaCasa(nomeClubeDaCasa, pagina, limite);
             else if(nomeClubeVisitante != null)
@@ -73,9 +67,9 @@ public class PartidaService {
     }
 
 
-    public Page<Partida> getPartidasPaginadasByGoleada(boolean goleada, int page, int size) {
+    public Page<Partida> getPartidasPaginadasByGoleada(boolean isGoleada, int page, int size) {
         Pageable paginacao = PageRequest.of(page, size);
-        Page<Partida> partidas = partidaRepository.findByGoleada(goleada, paginacao);
+        Page<Partida> partidas = partidaRepository.findByGoleada(isGoleada, paginacao);
 
         return partidas;
     }
@@ -104,16 +98,18 @@ public class PartidaService {
 
     public PartidaDto getMatchById(int id) {
 
-        Partida match = this.partidaRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-        "Não foi encontrada nenhuma partida com o ID " + id));
+        try {
+            Partida match = partidaRepository.findById(id);
+            PartidaDto dto = PartidaDto.partidaToDto(match);
+            return dto;
 
-        PartidaDto dto = PartidaDto.partidaToDto(match);
-
-        return dto;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida não encontrada", e);
+        }
     }
 
     public PartidaDto updateMatch(int id, Partida dadosAtualizados) {
-        Partida partida = this.partidaRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não foi encontrada nenhuma partida com ID" + id + ". Portanto, deve ser primeiro criada uma partida com este identificador, para então modifica-la."));
+        Partida partida = partidaRepository.findById(id);
         partidaValidation.validateMatchInput(partida);
 
         partida.setClubeDaCasa(dadosAtualizados.getClubeDaCasa());
@@ -123,18 +119,13 @@ public class PartidaService {
         partida.setGolsClubeVisitante(dadosAtualizados.getGolsClubeVisitante());
         partida.setEstadio(dadosAtualizados.getEstadio());
 
-        if (partida.getGolsClubeDaCasa() - partida.getGolsClubeVisitante() >= 3 || partida.getGolsClubeVisitante() - partida.getGolsClubeDaCasa() >= 3) {
-            partida.setGoleada(true);
-        }
-
         partidaRepository.save(partida);
 
         return PartidaDto.partidaToDto(partida);
     }
 
     public void deleteMatch(int id) {
-        Partida matchToDelete = partidaRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Não foi encontrada nenhuma partida com o id " + id));
+        Partida matchToDelete = partidaRepository.findById(id);
 
         partidaRepository.delete(matchToDelete);
 

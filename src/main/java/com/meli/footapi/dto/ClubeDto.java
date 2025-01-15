@@ -1,7 +1,6 @@
 package com.meli.footapi.dto;
 
 import java.time.LocalDate;
-import org.modelmapper.ModelMapper;
 
 import com.meli.footapi.entity.Clube;
 
@@ -19,19 +18,17 @@ public class ClubeDto {
     private String estado;
     private boolean ativo;
     private LocalDate dataDeCriacao;
-    private static ModelMapper mapper = new ModelMapper();
 
     public static Clube dtoToClube(ClubeDto dto) {        
-        Clube clube = mapper.map(dto, Clube.class);
+        Clube clube = new Clube(dto.getId(), dto.getNome(), dto.getEstado(), dto.isAtivo(), dto.getDataDeCriacao());
 
         return clube;
     }
 
-
     public static ClubeDto clubeToDto(Clube clube) {
-        ClubeDto clubeDto = mapper.map(clube, ClubeDto.class);
+        ClubeDto dto = new ClubeDto(clube.getId(), clube.getNome(), clube.getEstado(), clube.isAtivo(), clube.getDataDeCriacao());
 
-        return clubeDto;
+        return dto;
     }
 
 }
