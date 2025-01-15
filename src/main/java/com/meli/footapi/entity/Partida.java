@@ -41,7 +41,6 @@ public class Partida {
     @JoinColumn(nullable = false, updatable = false, name = "estadio_id")
     private Estadio estadio;
 
-    @JsonIgnore
     private boolean goleada = golsClubeDaCasa - golsClubeVisitante >= 3 || golsClubeVisitante - golsClubeDaCasa >= 3;
 
 }
