@@ -41,7 +41,7 @@ public class ClubeService {
 
     public Map<String, Object> getPaginatedClubs(@Nullable String nome, int pagina, int limite) {
         try {
-            List<Clube> clubes = new ArrayList<Clube>();
+            List<Clube> clubes;
             Page<Clube> paginaClube;
             if(nome == null)
                 paginaClube = getClubesPaginados(limite, pagina);
