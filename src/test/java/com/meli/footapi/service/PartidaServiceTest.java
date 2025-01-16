@@ -6,15 +6,12 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 
-import javax.management.InvalidAttributeValueException;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.meli.footapi.dto.PartidaDto;
 import com.meli.footapi.entity.Clube;
 import com.meli.footapi.entity.Estadio;
@@ -22,7 +19,7 @@ import com.meli.footapi.entity.Partida;
 import com.meli.footapi.repository.PartidaRepository;
 import com.meli.footapi.validation.PartidaValidation;
 
-@MockitoSettings
+@ExtendWith(MockitoExtension.class)
 public class PartidaServiceTest {
 
     @InjectMocks
@@ -46,13 +43,6 @@ public class PartidaServiceTest {
     @Mock
     LocalDateTime data;
 
-    @BeforeEach
-    public void init() {
-        
-        MockitoAnnotations.openMocks(this);
-    }
-    
-
     @Test
     void testCreatePartida() {
 
@@ -74,8 +64,7 @@ public class PartidaServiceTest {
     }
 
     @Test
-    @DisplayName("GIVEN valid partida_id :: WHEN partida exists :: SHOULD successfully get partida with said id")
-    void testGetMatchById() throws InvalidAttributeValueException {
+    void testGetMatchById() {
 
         int id = 123;
         Partida partidaValida = new Partida(id, casa, 0, visitante, 0, data, estadio, false);
