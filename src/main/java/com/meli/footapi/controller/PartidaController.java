@@ -36,6 +36,7 @@ public class PartidaController {
         return partidaService.getMatchById(matchId);
     }
 
+
     @GetMapping
     public ResponseEntity<Map<String, Object>> getPartidasPaginadas(
         @RequestParam(required = false) Boolean isGoleada, 
