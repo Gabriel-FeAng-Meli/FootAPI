@@ -30,10 +30,10 @@ public class PartidaValidation {
     public void validateMatchInput(Partida partidaParaValidar) throws ResponseStatusException {
         LocalDateTime dataPartida = partidaParaValidar.getDataPartida();
         Clube clubeDaCasa = clubeRepository.findById(partidaParaValidar.getClubeDaCasa().getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Clube da Casa não encontrado"));
-        Clube clubeVisitante = clubeRepository.findById(partidaParaValidar.getClubeDaCasa().getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Clube visitante não encontrado"));
+        Clube clubeVisitante = clubeRepository.findById(partidaParaValidar.getClubeVisitante().getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Clube visitante não encontrado"));
         Estadio estadio = estadioRepository.findById(partidaParaValidar.getEstadio().getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estadio não encontrado"));
         
-        validateDonoDoEstadio(clubeDaCasa, estadio.getId());
+        validateDonoDoEstadio(clubeDaCasa.getId(), estadio.getClube().getId());
         validateEstadioDate(dataPartida, estadio);
         validateClubeDaCasaDate(dataPartida, clubeDaCasa);
         validateClubeVisitanteDate(dataPartida, clubeVisitante);
@@ -97,10 +97,9 @@ public class PartidaValidation {
     }
 
 
-    private void validateDonoDoEstadio(Clube clubeDaCasa, int idClubeAssociadoAoEstadio) {
-        int idClubeDaCasa = clubeDaCasa.getId();
+    private void validateDonoDoEstadio(int idClubeDaCasa, int idClubeAssociadoAoEstadio) {
         if (idClubeAssociadoAoEstadio != idClubeDaCasa) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O id do estadio inserido não é do estadio pertencente ao clube " + clubeDaCasa.getNome());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O id do estadio inserido não é do estadio pertencente ao clube da casa");
         }
     };
 

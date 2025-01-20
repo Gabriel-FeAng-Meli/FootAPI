@@ -34,9 +34,7 @@ public class ClubeService {
         clubeValidation.validateClubInput(clube);
         clubeRepository.save(clube);
 
-        int id = clube.getId();
-
-        return getClubeById(id);
+        return ClubeDto.clubeToDto(clube);
     }
 
     public Map<String, Object> getPaginatedClubs(@Nullable String nome, int pagina, int limite) {
