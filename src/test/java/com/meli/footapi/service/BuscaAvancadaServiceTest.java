@@ -5,10 +5,8 @@ import com.meli.footapi.dto.RetrospectivaDto;
 import com.meli.footapi.entity.Clube;
 import com.meli.footapi.entity.Partida;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.InjectMocks;
 
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,11 +29,6 @@ class BuscaAvancadaServiceTest {
 
     @Mock
     private PartidaService mockPartidaService;
-
-    @BeforeEach
-    public void init() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void testGetRetrospectiva() {

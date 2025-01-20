@@ -52,4 +52,11 @@ public class ClubeValidationTest {
 
         assertThrows(ResponseStatusException.class,() -> clubeValidation.validateClubInput(clubeValido));
     }
+
+    @Test
+    void testValidateClubInput_DataNula() {
+        Clube clubeValido = new Clube(0, "EstadoInvalido", "MQ", true, null);
+
+        assertThrows(ResponseStatusException.class,() -> clubeValidation.validateClubInput(clubeValido));
+    }
 }
