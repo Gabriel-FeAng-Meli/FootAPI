@@ -29,6 +29,37 @@ public class PartidaService {
     @Autowired
     private PartidaValidation partidaValidation;
 
+
+
+    private Page<Partida> getPartidasPaginadasByGoleada(boolean isGoleada, int page, int size) {
+        Pageable paginacao = PageRequest.of(page, size);
+        Page<Partida> partidas = partidaRepository.findByGoleada(isGoleada, paginacao);
+
+        return partidas;
+    }
+
+    private Page<Partida> getPartidasPaginadasByNomeDoClubeDaCasa(String nome, int page, int size) {
+        Pageable paginacao = PageRequest.of(page, size);
+        Page<Partida> partidas = partidaRepository.findByClubeDaCasaNomeContains(nome, paginacao);
+
+        return partidas;
+    }
+
+
+    private Page<Partida> getPartidasPaginadasByNomeDoClubeVisitante(String nome, int page, int size) {
+        Pageable paginacao = PageRequest.of(page, size);
+        Page<Partida> partidas = partidaRepository.findByClubeVisitanteNomeContains(nome, paginacao);
+
+        return partidas;
+    }
+
+    private Page<Partida> getPartidasPaginadas(int page, int size) {
+        Pageable paginacao = PageRequest.of(page, size);
+        Page<Partida> partidas = partidaRepository.findAll(paginacao);
+
+        return partidas;
+    }
+
     public PartidaDto createPartida(Partida partida) {
         partidaValidation.validateMatchInput(partida);
 
@@ -64,36 +95,6 @@ public class PartidaService {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-    }
-
-
-    public Page<Partida> getPartidasPaginadasByGoleada(boolean isGoleada, int page, int size) {
-        Pageable paginacao = PageRequest.of(page, size);
-        Page<Partida> partidas = partidaRepository.findByGoleada(isGoleada, paginacao);
-
-        return partidas;
-    }
-
-    public Page<Partida> getPartidasPaginadasByNomeDoClubeDaCasa(String nome, int page, int size) {
-        Pageable paginacao = PageRequest.of(page, size);
-        Page<Partida> partidas = partidaRepository.findByClubeDaCasaNomeContains(nome, paginacao);
-
-        return partidas;
-    }
-
-
-    public Page<Partida> getPartidasPaginadasByNomeDoClubeVisitante(String nome, int page, int size) {
-        Pageable paginacao = PageRequest.of(page, size);
-        Page<Partida> partidas = partidaRepository.findByClubeVisitanteNomeContains(nome, paginacao);
-
-        return partidas;
-    }
-
-    public Page<Partida> getPartidasPaginadas(int page, int size) {
-        Pageable paginacao = PageRequest.of(page, size);
-        Page<Partida> partidas = partidaRepository.findAll(paginacao);
-
-        return partidas;
     }
 
     public PartidaDto getMatchById(int id) {
@@ -141,12 +142,14 @@ public class PartidaService {
 
     public List<Partida> getPartidasEntreDoisClubes(Clube clubeUm, Clube clubeDois) {
         
-        List<Partida> partidasClubeUm = partidaRepository.findByClubeDaCasa(clubeUm);
+        List<Partida> partidasClubeUm = new ArrayList<>();
+        partidasClubeUm.addAll(partidaRepository.findByClubeDaCasa(clubeUm));
         partidasClubeUm.addAll(partidaRepository.findByClubeVisitante(clubeUm));
         
-        List<Partida> partidasClubeDois = partidaRepository.findByClubeDaCasa(clubeDois);
+        List<Partida> partidasClubeDois = new ArrayList<>();
+        partidasClubeDois.addAll(partidaRepository.findByClubeDaCasa(clubeDois));
         partidasClubeDois.addAll(partidaRepository.findByClubeVisitante(clubeDois));
-        
+
         List<Partida> partidasEntreOsClubes = partidasClubeUm.stream().filter(partidasClubeDois::contains).toList();
 
         return partidasEntreOsClubes;

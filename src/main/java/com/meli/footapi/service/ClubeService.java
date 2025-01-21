@@ -30,6 +30,21 @@ public class ClubeService {
     @Autowired
     protected ClubeValidation clubeValidation;
 
+
+    private Page<Clube> getClubeByNome(String nome, int size, int page) {
+        Pageable paginacao = PageRequest.of(page, size);
+        Page<Clube> paginado = clubeRepository.findByNomeContaining(nome, paginacao);
+
+        return paginado;
+    } 
+
+    private Page<Clube> getClubesPaginados(int size, int page) {
+        Pageable paginacao = PageRequest.of(page, size);
+        Page<Clube> paginado = clubeRepository.findAll(paginacao);
+
+        return paginado;
+    } 
+
     public ClubeDto createClub(Clube clube) {
         clubeValidation.validateClubInput(clube);
         clubeRepository.save(clube);
@@ -62,23 +77,10 @@ public class ClubeService {
     }
 
   
-    public Page<Clube> getClubeByNome(String nome, int size, int page) {
-        Pageable paginacao = PageRequest.of(page, size);
-        Page<Clube> paginado = clubeRepository.findByNomeContaining(nome, paginacao);
-
-        return paginado;
-    } 
-
-    public Page<Clube> getClubesPaginados(int size, int page) {
-        Pageable paginacao = PageRequest.of(page, size);
-        Page<Clube> paginado = clubeRepository.findAll(paginacao);
-
-        return paginado;
-    } 
 
     public ClubeDto getClubeById(int id) {
         Clube clube = this.clubeRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-        "Não foi encontrado nenhum clube com o ID " + id));
+        "Não foi encontrado nenhum clube com o ID informado"));
 
         ClubeDto dto = mapper.map(clube, ClubeDto.class);
 
@@ -109,7 +111,7 @@ public class ClubeService {
 
     }
 
-    public List<ClubeDto> getClubes() {
+    public List<ClubeDto> listarClubesDto() {
         List<Clube> listaDeClubes = clubeRepository.findAll();
 
         List<ClubeDto> listaDeClubesDto = new ArrayList<>();
