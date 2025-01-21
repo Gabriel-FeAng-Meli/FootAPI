@@ -1,6 +1,7 @@
 package com.meli.footapi.service;
 
 import com.meli.footapi.dto.ClubeDto;
+import com.meli.footapi.dto.RankingDto;
 import com.meli.footapi.dto.RetrospectivaDto;
 import com.meli.footapi.entity.Clube;
 import com.meli.footapi.entity.Partida;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,30 +27,25 @@ class BuscaAvancadaServiceTest {
     private BuscaAvancadaService buscaAvancadaService;
 
     @Mock
-    private ClubeService mockClubeService;
+    private ClubeService clubeService;
 
     @Mock
-    private PartidaService mockPartidaService;
+    private PartidaService partidaService;
+
+    private ClubeDto clubeDto = new ClubeDto(0, "clube", "SP", true, LocalDate.of(1212, 1, 1));
+    private ClubeDto outroClubeDto = new ClubeDto(1, "outroClube", "SP", true, LocalDate.of(1212, 1, 1));
+    private Clube clubeDaCasa = new Clube(0, "clube", "SP", true, LocalDate.of(1212,1,1));
+    private Clube clubeVisitante = new Clube(1, "clubeAdversario", "SP", true, LocalDate.of(1212,1,1));
+    private Partida partida = new Partida(0, clubeDaCasa, 0, clubeVisitante, 0, LocalDateTime.of(2000, 1, 1, 1, 1, 1), null, false);
+    private List<Partida> partidas = List.of(partida);
 
     @Test
     void testGetRetrospectiva() {
         RetrospectivaDto expectedResult = new RetrospectivaDto("clube-SP", 0,0,0,1,0,1,1);
 
-        ClubeDto clubeDto = new ClubeDto(0, "clube", "SP", true, LocalDate.of(1212, 1, 1));
+        when(clubeService.getClubeById(0)).thenReturn(clubeDto);
 
-        when(mockClubeService.getClubeById(0)).thenReturn(clubeDto);
-
-        Clube clubeDaCasa = new Clube(0, "clube", "SP", true, LocalDate.of(1212,1,1));
-
-        Clube clubeVisitante = new Clube(1, "clubeAdversario", "SP", true, LocalDate.of(1212,1,1));
-        
-        Partida partida = new Partida();
-        partida.setClubeDaCasa(clubeDaCasa);
-        partida.setClubeVisitante(clubeVisitante);
-        
-        List<Partida> partidas = List.of(partida);
-
-        when(mockPartidaService.getPartidasByClube(ClubeDto.dtoToClube(clubeDto))).thenReturn(partidas);
+        when(partidaService.getPartidasByClube(ClubeDto.dtoToClube(clubeDto))).thenReturn(partidas);
 
         RetrospectivaDto result = buscaAvancadaService.getRetrospectiva(0);
 
@@ -58,14 +55,12 @@ class BuscaAvancadaServiceTest {
     @Test
     void testGetRetrospectiva_MasClubeSemPartidas() {
 
-        ClubeDto clubeDto = new ClubeDto(0, "clubeSemPartidas", "SP", true, LocalDate.of(1212, 1, 1));
-        
-        RetrospectivaDto expectedResult = new RetrospectivaDto("clubeSemPartidas-SP", 0, 0, 0, 
+        RetrospectivaDto expectedResult = new RetrospectivaDto("clube-SP", 0, 0, 0, 
         0, 0, 0, 0);
 
-        when(mockClubeService.getClubeById(0)).thenReturn(clubeDto);
+        when(clubeService.getClubeById(0)).thenReturn(clubeDto);
 
-        when(mockPartidaService.getPartidasByClube(ClubeDto.dtoToClube(clubeDto))).thenReturn(List.of());
+        when(partidaService.getPartidasByClube(ClubeDto.dtoToClube(clubeDto))).thenReturn(List.of());
 
         RetrospectivaDto result = buscaAvancadaService.getRetrospectiva(0);
 
@@ -74,19 +69,14 @@ class BuscaAvancadaServiceTest {
 
     @Test
     void testGetConfrontosDiretos_MasClubesNuncaSeEnfrentaram() {
-        RetrospectivaDto expectedResult = new RetrospectivaDto("clubeSemPartidas-SP X outroClube-SP", 0, 0, 0, 
+        RetrospectivaDto expectedResult = new RetrospectivaDto("clube-SP X outroClube-SP", 0, 0, 0, 
         0, 0, 0, 0);
 
-        ClubeDto clubeDto = new ClubeDto(0, "clubeSemPartidas", "SP", true, LocalDate.of(1212, 1, 1));
+        when(clubeService.getClubeById(0)).thenReturn(clubeDto);
 
+        when(clubeService.getClubeById(1)).thenReturn(outroClubeDto);
 
-        when(mockClubeService.getClubeById(0)).thenReturn(clubeDto);
-
-        ClubeDto outroClubeDto = new ClubeDto(1, "outroClube", "SP", true, LocalDate.of(1212, 1, 1));
-
-        when(mockClubeService.getClubeById(1)).thenReturn(outroClubeDto);
-
-        when(mockPartidaService.getPartidasByClube(ClubeDto.dtoToClube(clubeDto))).thenReturn(List.of());
+        when(partidaService.getPartidasByClube(ClubeDto.dtoToClube(clubeDto))).thenReturn(List.of());
 
         RetrospectivaDto result = buscaAvancadaService.getConfrontosDiretos(0, 1);
 
@@ -100,11 +90,10 @@ class BuscaAvancadaServiceTest {
         List<RetrospectivaDto> expectedResult = List.of(retrospectivaDto);
 
         ClubeDto clubeDto = new ClubeDto(0, "casa", "SP", true, LocalDate.of(1212, 1, 1));
-        when(mockClubeService.getClubeById(0)).thenReturn(clubeDto);
-
+        when(clubeService.getClubeById(0)).thenReturn(clubeDto);
 
         ClubeDto outroClubeDto = new ClubeDto(1, "visitante", "SP", true, LocalDate.of(1212, 1, 1));
-        when(mockClubeService.getClubeById(1)).thenReturn(outroClubeDto);
+        when(clubeService.getClubeById(1)).thenReturn(outroClubeDto);
 
         Clube clubeDaCasa = ClubeDto.dtoToClube(clubeDto);
         Clube clubeVisitante = ClubeDto.dtoToClube(outroClubeDto);
@@ -115,7 +104,7 @@ class BuscaAvancadaServiceTest {
 
         List<Partida> partidas = List.of(partida);
 
-        when(mockPartidaService.getPartidasByClube(ClubeDto.dtoToClube(clubeDto))).thenReturn(partidas);
+        when(partidaService.getPartidasByClube(ClubeDto.dtoToClube(clubeDto))).thenReturn(partidas);
 
         List<RetrospectivaDto> result = buscaAvancadaService.getRetrospectivaParaCadaAdversario(0);
 
@@ -124,10 +113,9 @@ class BuscaAvancadaServiceTest {
 
     @Test
     void testGetRetrospectivaParaCadaAdversario_MasClubeSemPartidas() {
-        ClubeDto clubeDto = new ClubeDto(0, "clube", "SP", true, LocalDate.of(1212, 1, 1));
-        when(mockClubeService.getClubeById(0)).thenReturn(clubeDto);
+        when(clubeService.getClubeById(0)).thenReturn(clubeDto);
 
-        when(mockPartidaService.getPartidasByClube(ClubeDto.dtoToClube(clubeDto))).thenReturn(List.of());
+        when(partidaService.getPartidasByClube(ClubeDto.dtoToClube(clubeDto))).thenReturn(List.of());
 
         List<RetrospectivaDto> result = buscaAvancadaService.getRetrospectivaParaCadaAdversario(0);
 
@@ -135,6 +123,27 @@ class BuscaAvancadaServiceTest {
     }
 
     @Test
-    void testGetRanking() {}
+    void testGetRanking() {
 
+        ClubeDto casa = ClubeDto.clubeToDto(clubeDaCasa);
+        ClubeDto visitante = ClubeDto.clubeToDto(clubeVisitante);
+
+        RankingDto expectedRank1 = new RankingDto(1, casa, 1);
+        RankingDto expectedRank2 = new RankingDto(2, visitante, 1);
+
+        when(clubeService.listarClubesDto()).thenReturn(List.of(casa, visitante));
+        when(clubeService.getClubeById(0)).thenReturn(casa);
+        when(clubeService.getClubeById(1)).thenReturn(visitante);
+        when(partidaService.getPartidasByClube(clubeDaCasa)).thenReturn(partidas);
+        when(partidaService.getPartidasByClube(clubeVisitante)).thenReturn(partidas);
+
+        assertEquals(List.of(expectedRank1, expectedRank2), buscaAvancadaService.getRanking());
+    }
+
+    @Test
+    void testGetRanking_SemClubesCadastrados() {
+        when(clubeService.listarClubesDto()).thenReturn(List.of());
+
+        assertEquals(List.of(), buscaAvancadaService.getRanking());
+    }
 }

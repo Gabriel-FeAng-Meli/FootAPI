@@ -20,6 +20,7 @@ public class ClubeValidation {
 
     public void validateClubInput(Clube clubToValidate) {
 
+        
         String nomeDoClube = clubToValidate.getNome();
         String estadoDoClube = clubToValidate.getEstado();
         validateClubName(nomeDoClube);
@@ -30,7 +31,7 @@ public class ClubeValidation {
 
 
     private void validateClubDate(LocalDate inputedDate) {
-        if (inputedDate != null && inputedDate.isAfter(LocalDate.now())) {
+        if (inputedDate == null || inputedDate.isAfter(LocalDate.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A data de criação do clube não pode ser no futuro. Insira uma data valida no formato YYYY-MM-DD");
         }
     }

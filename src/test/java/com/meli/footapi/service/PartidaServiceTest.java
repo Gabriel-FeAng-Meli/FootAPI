@@ -7,14 +7,18 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -55,6 +59,84 @@ public class PartidaServiceTest {
     }
 
     @Test
+    void testPaginarPartidas() {
+
+        Pageable paginacao = PageRequest.of(0, 1);
+
+        Map<String, Object> expected = new HashMap<>();
+        expected.put("Partidas", List.of());
+        expected.put("paginaAtual", 1);
+        expected.put("totalDeItens", 0);
+        expected.put("totalDePaginas", 1);
+
+        when(partidaRepository.findAll(paginacao)).thenReturn(Page.empty());
+
+        Map<String, Object> response = partidaService.paginarPartidas(null, null, null, 0, 1);
+
+        assertEquals(expected.get("Partidas"), response.get("Partidas"));
+    }
+
+    @Test
+    void testPaginarPartidas_InvalidInput() {
+
+        assertThrows(ResponseStatusException.class, () -> partidaService.paginarPartidas(null, null, null, 0, 0));
+    }
+
+    @Test
+    void testPaginarPartidas_ByGoleada() {
+
+        Pageable paginacao = PageRequest.of(0, 1);
+
+        Map<String, Object> expected = new HashMap<>();
+        expected.put("Partidas", List.of());
+        expected.put("paginaAtual", 1);
+        expected.put("totalDeItens", 0);
+        expected.put("totalDePaginas", 1);
+
+        when(partidaRepository.findByGoleada(false, paginacao)).thenReturn(Page.empty());
+
+        Map<String, Object> response = partidaService.paginarPartidas(false, null, null, 0, 1);
+
+        assertEquals(expected.get("Partidas"), response.get("Partidas"));
+    }
+
+    @Test
+    void testPaginarPartidas_ByClubeDaCasa() {
+
+        Pageable paginacao = PageRequest.of(0, 1);
+
+        Map<String, Object> expected = new HashMap<>();
+        expected.put("Partidas", List.of());
+        expected.put("paginaAtual", 1);
+        expected.put("totalDeItens", 0);
+        expected.put("totalDePaginas", 1);
+
+        when(partidaRepository.findByClubeDaCasaNomeContains("casa", paginacao)).thenReturn(Page.empty());
+
+        Map<String, Object> response = partidaService.paginarPartidas(null, "casa", null, 0, 1);
+
+        assertEquals(expected.get("Partidas"), response.get("Partidas"));
+    }
+
+    @Test
+    void testPaginarPartidas_ByClubeVisitante() {
+
+        Pageable paginacao = PageRequest.of(0, 1);
+
+        Map<String, Object> expected = new HashMap<>();
+        expected.put("Partidas", List.of());
+        expected.put("paginaAtual", 1);
+        expected.put("totalDeItens", 0);
+        expected.put("totalDePaginas", 1);
+
+        when(partidaRepository.findByClubeVisitanteNomeContains("visitante", paginacao)).thenReturn(Page.empty());
+
+        Map<String, Object> response = partidaService.paginarPartidas(null, null, "visitante", 0, 1);
+
+        assertEquals(expected.get("Partidas"), response.get("Partidas"));
+    }
+
+    @Test
     void testDeleteMatch() {
 
         when(partidaRepository.findById(0)).thenReturn(partida);
@@ -64,32 +146,40 @@ public class PartidaServiceTest {
     }
 
     @Test
-    void testGetPartidasPaginadasByGoleada() {
+    void testDeleteMatch_PartidaNaoEncontrada() {
 
-        PageRequest paginacao = PageRequest.of(0, 1);
+        when(partidaRepository.findById(10)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        when(partidaRepository.findByGoleada(true, paginacao)).thenReturn(Page.empty());
+        assertThrows(ResponseStatusException.class, () -> partidaService.deleteMatch(10));
 
-        List<Partida> expectedContent = List.of();
-
-        Page<Partida> result = partidaService.getPartidasPaginadasByGoleada(true, 0, 1);
-
-        assertEquals(expectedContent, result.getContent());
     }
 
+    @Test
+    void testUpdateMatch() {
+
+        Partida novosDados = new Partida(0, clubeDaCasa, 0, clubeVisitante, 0, LocalDateTime.of(1212, 1, 1, 5, 1, 1), estadio, false);
+
+        int idPartidaParaAtualizar = 0;
+
+        when(partidaRepository.findById(0)).thenReturn(partida);
+
+        PartidaDto expected = PartidaDto.partidaToDto(novosDados);
+
+        PartidaDto result = partidaService.updateMatch(idPartidaParaAtualizar, novosDados);
+        
+        assertEquals(expected, result);
+
+    }
 
     @Test
-    void testGetPartidasPaginadas() {
+    void testUpdateMatch_PartidaNaoEncontrada() {
 
-        PageRequest paginacao = PageRequest.of(0, 1);
+        Partida novosDados = new Partida(0, clubeDaCasa, 0, clubeVisitante, 0, LocalDateTime.of(1212, 1, 1, 5, 1, 1), estadio, false);
 
-        when(partidaRepository.findAll(paginacao)).thenReturn(Page.empty());
+        int idPartidaParaAtualizar = 10;
 
-        List<Partida> expectedContent = List.of();
-
-        Page<Partida> result = partidaService.getPartidasPaginadas(0, 1);
-
-        assertEquals(expectedContent, result.getContent());
+        when(partidaRepository.findById(10)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+        assertThrows(ResponseStatusException.class, () -> partidaService.updateMatch(idPartidaParaAtualizar, novosDados));
     }
 
     @Test
@@ -111,6 +201,16 @@ public class PartidaServiceTest {
         
         assertThrows(ResponseStatusException.class, () -> partidaService.getMatchById(0));
 
+    }
+
+    @Test
+    void testGetPartidasEntreDoisClubes() {
+        when(partidaRepository.findByClubeDaCasa(clubeDaCasa)).thenReturn(List.of(partida));
+        when(partidaRepository.findByClubeVisitante(clubeDaCasa)).thenReturn(List.of());
+        when(partidaRepository.findByClubeDaCasa(clubeVisitante)).thenReturn(List.of());
+        when(partidaRepository.findByClubeVisitante(clubeVisitante)).thenReturn(List.of(partida));
+
+        assertEquals(List.of(partida), partidaService.getPartidasEntreDoisClubes(clubeDaCasa, clubeVisitante));
     }
 
 }

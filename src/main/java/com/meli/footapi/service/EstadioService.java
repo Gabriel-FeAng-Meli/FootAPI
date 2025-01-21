@@ -26,39 +26,34 @@ public class EstadioService {
     @Autowired
     private EstadioValidation estadioValidation;
 
-    public EstadioDto createStadium(Estadio stadium) {
-        estadioValidation.validateStadiumInput(stadium);
-
-        estadioRepository.save(stadium);
-
-        return getStadiumById(stadium.getId());
-    }
-
-    public List<EstadioDto> getStadiums() {
-        List<EstadioDto> dtoList = new ArrayList<>();
-        List<Estadio> stadiumList = estadioRepository.findAll();
-    
-        for (int i = 0; i < stadiumList.size(); i++) {
-            Estadio c = stadiumList.get(i);
-            dtoList.add(EstadioDto.estadioToDto(c));
-        }
-
-        return dtoList;
-    }
-
-    public Page<Estadio> findByNome(String nome, int size, int page) {
+    private Page<Estadio> findByNome(String nome, int size, int page) {
         Pageable paginacao = PageRequest.of(page, size);
         Page<Estadio> paginado = estadioRepository.findByNome(nome, paginacao);
 
         return paginado;
     } 
 
-    public Page<Estadio> findAll(int size, int page) {
+    private Page<Estadio> findAll(int size, int page) {
         Pageable paginacao = PageRequest.of(page, size);
         Page<Estadio> paginado = estadioRepository.findAll(paginacao);
 
         return paginado;
     } 
+
+    public EstadioDto createStadium(Estadio stadium) {
+        estadioValidation.validateStadiumInput(stadium);
+
+        estadioRepository.save(stadium);
+
+        return EstadioDto.estadioToDto(stadium);
+    }
+
+    public List<EstadioDto> listarEstadiosDto() {
+        List<EstadioDto> dtoList = new ArrayList<>();
+        estadioRepository.findAll().stream().forEach(estadio -> dtoList.add(EstadioDto.estadioToDto(estadio)));
+    
+        return dtoList;
+    }
 
 
     public EstadioDto getStadiumById(int id) {

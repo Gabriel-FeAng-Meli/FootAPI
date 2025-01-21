@@ -40,22 +40,37 @@ public class ClubeValidationTest {
     }
 
     @Test
-    void testValidateClubInput_EstadoInvalido() {
-        Clube clubeValido = new Clube(0, "EstadoInvalido", "MQ", true, LocalDate.of(1212,1,1));
+    void testValidateClubInput_NomeNulo() {
+        Clube clubeValido = new Clube(0, null, "SP", true, LocalDate.of(1212,1,1));
 
         assertThrows(ResponseStatusException.class,() -> clubeValidation.validateClubInput(clubeValido));
     }
 
     @Test
+    void testValidateClubInput_EstadoInvalido() {
+        Clube clubeValido = new Clube(0, "Estado Invalido", "MQ", true, LocalDate.of(1212,1,1));
+
+        assertThrows(ResponseStatusException.class,() -> clubeValidation.validateClubInput(clubeValido));
+    }
+
+    @Test
+    void testValidateClubInput_EstadoNulo() {
+        Clube clubeValido = new Clube(0, "Estado Nulo", null, true, LocalDate.of(1212,1,1));
+
+        assertThrows(ResponseStatusException.class,() -> clubeValidation.validateClubInput(clubeValido));
+    }
+
+
+    @Test
     void testValidateClubInput_DataDeCriacaoInvalida() {
-        Clube clubeValido = new Clube(0, "DataInvalida", "MQ", true, LocalDate.of(2121,1,1));
+        Clube clubeValido = new Clube(0, "Data Invalida", "SP", true, LocalDate.of(2121,1,1));
 
         assertThrows(ResponseStatusException.class,() -> clubeValidation.validateClubInput(clubeValido));
     }
 
     @Test
     void testValidateClubInput_DataNula() {
-        Clube clubeValido = new Clube(0, "EstadoInvalido", "MQ", true, null);
+        Clube clubeValido = new Clube(0, "Data Nula", "SP", true, null);
 
         assertThrows(ResponseStatusException.class,() -> clubeValidation.validateClubInput(clubeValido));
     }
