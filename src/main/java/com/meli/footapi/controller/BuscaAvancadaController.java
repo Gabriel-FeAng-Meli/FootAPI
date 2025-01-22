@@ -32,7 +32,7 @@ public class BuscaAvancadaController {
 
     @GetMapping("/{id}/retrospectiva/clubes")
     public ResponseEntity<List<RetrospectivaDto>> getRetrospectivaParaCadaAdversario(@PathVariable(value = "id") int clubId) {
-        return ResponseEntity.ok(buscaAvancadaService.getRetrospectivaParaCadaAdversario(clubId));
+        return ResponseEntity.status(200).body(buscaAvancadaService.getRetrospectivaParaCadaAdversario(clubId));
     }
     
     @GetMapping("/ranking")

@@ -47,7 +47,7 @@ public class ClubeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateClub(@PathVariable(value = "id") int clubId, @RequestBody Clube newClubInfo) {
-        return ResponseEntity.status(204).body(clubeService.updateClube(clubId, newClubInfo));
+        return ResponseEntity.status(200).body(clubeService.updateClube(clubId, newClubInfo));
     }
 
     @DeleteMapping("/{id}")

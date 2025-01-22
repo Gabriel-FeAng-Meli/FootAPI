@@ -50,7 +50,7 @@ public class PartidaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateMatch(@PathVariable(value = "id") int matchId, @RequestBody Partida informaçãoAtualizada) {
-        return ResponseEntity.status(204).body(partidaService.updateMatch(matchId, informaçãoAtualizada));
+        return ResponseEntity.status(200).body(partidaService.updateMatch(matchId, informaçãoAtualizada));
     }
 
     @DeleteMapping("/{id}")

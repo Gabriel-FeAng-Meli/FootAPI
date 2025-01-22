@@ -85,7 +85,7 @@ public class ClubeServiceTest {
 
         PageRequest paginacao = PageRequest.of(0, 1);
 
-        when(clubeRepository.findByNomeContaining("casa" ,paginacao)).thenReturn(Page.empty());
+        when(clubeRepository.findByNomeContaining("casa", paginacao)).thenReturn(Page.empty());
 
         Map<String, Object> response = clubeService.getPaginatedClubs("casa", 0, 1);
 
@@ -106,7 +106,7 @@ public class ClubeServiceTest {
         when(clubeRepository.findById(0)).thenReturn(clubeOpt);
 
         assertDoesNotThrow(() -> clubeService.deleteClube(0));
-        
+
     }
 
     @Test
@@ -115,7 +115,7 @@ public class ClubeServiceTest {
         when(clubeRepository.findById(0)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         assertThrows(ResponseStatusException.class, () -> clubeService.deleteClube(0));
-        
+
     }
 
     @Test
@@ -129,7 +129,7 @@ public class ClubeServiceTest {
         ClubeDto expected = ClubeDto.clubeToDto(novosDados);
 
         ClubeDto result = clubeService.updateClube(idDoClubeASerAtualizado, novosDados);
-        
+
         assertEquals(expected, result);
 
     }
@@ -143,15 +143,15 @@ public class ClubeServiceTest {
         when(clubeRepository.findById(0)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         assertThrows(ResponseStatusException.class, () -> clubeService.updateClube(idDoClubeASerAtualizado, novosDados));
-        
+
     }
 
     @Test
     void testGetClubeById() {
- 
-        ClubeDto dtoEsperado = ClubeDto.clubeToDto(clube);   
+
+        ClubeDto dtoEsperado = ClubeDto.clubeToDto(clube);
         when(clubeRepository.findById(0)).thenReturn(clubeOpt);
-        
+
         ClubeDto dtoRecebido = clubeService.getClubeById(0);
 
         assertEquals(dtoEsperado, dtoRecebido);
@@ -160,9 +160,9 @@ public class ClubeServiceTest {
 
     @Test
     void testGetClubeById_NaoEncontrada() {
- 
+
         when(clubeRepository.findById(0)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
-        
+
         assertThrows(ResponseStatusException.class, () -> clubeService.getClubeById(0));
 
     }
@@ -177,5 +177,4 @@ public class ClubeServiceTest {
 
         assertEquals(expected, response);
     }
-
 }

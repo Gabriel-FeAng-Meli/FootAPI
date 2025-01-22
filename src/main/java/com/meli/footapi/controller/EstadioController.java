@@ -47,7 +47,7 @@ public class EstadioController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateStadium(@PathVariable(value = "id") int stadiumId, @RequestBody Estadio newStadiumInfo) {
-        return ResponseEntity.status(204).body(estadioService.updateStadium(stadiumId, newStadiumInfo));
+        return ResponseEntity.status(200).body(estadioService.updateStadium(stadiumId, newStadiumInfo));
     }
 
     @DeleteMapping("/{id}")
