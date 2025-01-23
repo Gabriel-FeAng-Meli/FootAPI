@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -22,8 +20,6 @@ import com.meli.footapi.validation.ClubeValidation;
 @Service
 public class ClubeService {
 
-    private static final ModelMapper mapper = new ModelMapper();
-
     @Autowired
     protected ClubeRepository clubeRepository;
 
@@ -34,6 +30,14 @@ public class ClubeService {
     private Page<Clube> getClubeByNome(String nome, int size, int page) {
         Pageable paginacao = PageRequest.of(page, size);
         Page<Clube> paginado = clubeRepository.findByNomeContaining(nome, paginacao);
+
+        return paginado;
+    } 
+
+
+    private Page<Clube> getClubeByAtivo(Boolean ativo, int size, int page) {
+        Pageable paginacao = PageRequest.of(page, size);
+        Page<Clube> paginado = clubeRepository.findByAtivo(ativo, paginacao);
 
         return paginado;
     } 
@@ -52,14 +56,17 @@ public class ClubeService {
         return ClubeDto.clubeToDto(clube);
     }
 
-    public Map<String, Object> getPaginatedClubs(@Nullable String nome, int pagina, int limite) {
+    public Map<String, Object> getPaginatedClubs(Boolean ativo, String nome, int pagina, int limite) {
         try {
             List<Clube> clubes;
             Page<Clube> paginaClube;
-            if(nome == null)
-                paginaClube = getClubesPaginados(limite, pagina);
+            if(nome != null)
+                paginaClube = getClubeByNome(nome, limite, pagina);                
+            else if(ativo != null)
+                paginaClube = getClubeByAtivo(ativo, limite, pagina);
             else {
-                paginaClube = getClubeByNome(nome, limite, pagina);
+                paginaClube = getClubesPaginados(limite, pagina);
+
             }
 
             clubes = paginaClube.getContent();
@@ -82,7 +89,7 @@ public class ClubeService {
         Clube clube = this.clubeRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
         "Não foi encontrado nenhum clube com o ID informado"));
 
-        ClubeDto dto = mapper.map(clube, ClubeDto.class);
+        ClubeDto dto = ClubeDto.clubeToDto(clube);
 
         return dto;
     }
@@ -97,7 +104,7 @@ public class ClubeService {
         clubeParaAtualizarDto.setAtivo(novosDadosDoClube.isAtivo());
         clubeParaAtualizarDto.setDataDeCriacao(novosDadosDoClube.getDataDeCriacao());
 
-        Clube clubeAtualizado = mapper.map(clubeParaAtualizarDto, Clube.class);
+        Clube clubeAtualizado = ClubeDto.dtoToClube(clubeParaAtualizarDto);
         clubeRepository.save(clubeAtualizado);
 
         return clubeParaAtualizarDto;
@@ -111,13 +118,24 @@ public class ClubeService {
 
     }
 
-    public List<ClubeDto> listarClubesDto() {
-        List<Clube> listaDeClubes = clubeRepository.findAll();
+    public ClubeDto inactivateClube(int id) {
+        Clube clube = clubeRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Não foi encontrado nenhum clube com o id inserido."));
+
+        clube.setAtivo(false);
+        clubeRepository.save(clube);
+
+        ClubeDto dto = ClubeDto.clubeToDto(clube);
+
+        return dto;
+    }
+
+    public List<ClubeDto> listarClubesAtivos() {
+        List<Clube> listaDeClubes = clubeRepository.findByAtivo(true);
 
         List<ClubeDto> listaDeClubesDto = new ArrayList<>();
 
         listaDeClubes.forEach(clube -> {
-            ClubeDto dto = mapper.map(clube, ClubeDto.class);
+            ClubeDto dto = ClubeDto.clubeToDto(clube);
             listaDeClubesDto.add(dto);
         });
         return listaDeClubesDto;

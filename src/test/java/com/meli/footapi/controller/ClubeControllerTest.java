@@ -84,7 +84,7 @@ class ClubeControllerTest {
                 expected.put("totalDePaginas", 1);
     
 
-                when(clubeService.getPaginatedClubs("clube", 0, 1)).thenReturn(expected);
+                when(clubeService.getPaginatedClubs(null, "clube", 0, 1)).thenReturn(expected);
 
                 MockHttpServletResponse response = mockMvc.perform(get("/clubes").queryParam("nome", "clube").queryParam("page", "0").queryParam("size", "1").accept(MediaType.APPLICATION_JSON)).getResponse();
 

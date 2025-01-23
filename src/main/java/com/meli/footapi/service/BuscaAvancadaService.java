@@ -69,7 +69,7 @@ public class BuscaAvancadaService {
     public List<RankingDto> getRanking() {
         List<RankingDto> unsortedRanking= new ArrayList<>();
         
-        List<ClubeDto> todosOsClubes = clubeService.listarClubesDto();
+        List<ClubeDto> todosOsClubes = clubeService.listarClubesAtivos();
 
         todosOsClubes.forEach(clube -> {
             int id = clube.getId();

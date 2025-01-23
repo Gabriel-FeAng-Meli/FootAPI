@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -38,11 +39,12 @@ public class ClubeController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getPaginatedClubes(
+        @RequestParam(required = false) Boolean ativo,
         @RequestParam(required = false) String nome,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size
     ) {
-        return ResponseEntity.ok(clubeService.getPaginatedClubs(nome, page, size));
+        return ResponseEntity.ok(clubeService.getPaginatedClubs(ativo, nome, page, size));
     }
 
     @PutMapping("/{id}")
@@ -55,5 +57,11 @@ public class ClubeController {
         clubeService.deleteClube(clubId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/inactivate")
+    public ResponseEntity<?> inactivateClub(@PathVariable(value = "id") int clubId) {
+
+        return ResponseEntity.status(200).body(clubeService.inactivateClube(clubId));
     }
 }

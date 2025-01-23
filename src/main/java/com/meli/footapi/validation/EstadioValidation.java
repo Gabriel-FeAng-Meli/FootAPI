@@ -49,11 +49,14 @@ public class EstadioValidation {
         }
     };
 
-    private void validateHomeClub(Clube clubeAssociado) {
-        try {
-            clubeRepository.findById(clubeAssociado.getId());
-        } catch (ResponseStatusException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O estadio precisa estar vinculado a um clube existente e ativo.");
+    private void validateHomeClub(Clube inputedClube) {
+
+        Clube clube = clubeRepository.findById(inputedClube.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "O estadio precisa estar vinculado a um clube existente."));
+
+        if (!clube.isAtivo()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O estadio só pode ser vinculado a um clube ativo");
+
         }
+            
     }
 }

@@ -70,7 +70,7 @@ public class ClubeServiceTest {
 
         when(clubeRepository.findAll(paginacao)).thenReturn(Page.empty());
 
-        Map<String, Object> response = clubeService.getPaginatedClubs(null, 0, 1);
+        Map<String, Object> response = clubeService.getPaginatedClubs(null, null, 0, 1);
 
         assertEquals(expected.get("Clubes"), response.get("Clubes"));
     }
@@ -87,7 +87,25 @@ public class ClubeServiceTest {
 
         when(clubeRepository.findByNomeContaining("casa", paginacao)).thenReturn(Page.empty());
 
-        Map<String, Object> response = clubeService.getPaginatedClubs("casa", 0, 1);
+        Map<String, Object> response = clubeService.getPaginatedClubs(null, "casa", 0, 1);
+
+        assertEquals(expected.get("Clubes"), response.get("Clubes"));
+
+    }
+
+    @Test
+    void testGetPaginatedClubs_ByActivity() {
+        Map<String, Object> expected = new HashMap<>();
+        expected.put("Clubes", List.of());
+        expected.put("paginaAtual", 1);
+        expected.put("totalDeItens", 0);
+        expected.put("totalDePaginas", 1);
+
+        PageRequest paginacao = PageRequest.of(0, 1);
+
+        when(clubeRepository.findByAtivo(true, paginacao)).thenReturn(Page.empty());
+
+        Map<String, Object> response = clubeService.getPaginatedClubs(true, null, 0, 1);
 
         assertEquals(expected.get("Clubes"), response.get("Clubes"));
 
@@ -95,7 +113,7 @@ public class ClubeServiceTest {
 
     @Test
     void testGetPaginatedClubs_BadRequest() {
-        assertThrows(ResponseStatusException.class, () -> clubeService.getPaginatedClubs("casa", 0, 0));
+        assertThrows(ResponseStatusException.class, () -> clubeService.getPaginatedClubs(null, "casa", 0, 0));
 
     }
 
@@ -171,9 +189,9 @@ public class ClubeServiceTest {
     void testListarClubesDto() {
         List<ClubeDto> expected = List.of(ClubeDto.clubeToDto(clube));
 
-        when(clubeRepository.findAll()).thenReturn(List.of(clube));
+        when(clubeRepository.findByAtivo(true)).thenReturn(List.of(clube));
 
-        List<ClubeDto> response = clubeService.listarClubesDto();
+        List<ClubeDto> response = clubeService.listarClubesAtivos();
 
         assertEquals(expected, response);
     }

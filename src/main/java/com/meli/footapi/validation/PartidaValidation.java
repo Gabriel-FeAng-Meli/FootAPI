@@ -34,12 +34,18 @@ public class PartidaValidation {
         Estadio estadio = estadioRepository.findById(partidaParaValidar.getEstadio().getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estadio não encontrado"));
         
         validateDonoDoEstadio(clubeDaCasa.getId(), estadio.getClube().getId());
+        validateClubesAtivos(clubeDaCasa.isAtivo(), clubeVisitante.isAtivo());
         validateEstadioDate(dataPartida, estadio);
         validateClubeDaCasaDate(dataPartida, clubeDaCasa);
         validateClubeVisitanteDate(dataPartida, clubeVisitante);
     }
     
 
+    private void validateClubesAtivos(boolean clubeDaCasaAtivo, boolean clubeVisitanteAtivo) {
+        if(!clubeVisitanteAtivo || !clubeDaCasaAtivo) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Só podem ser cadastradas partidas entre dois clubes ativos");
+        }
+    }
 
     private void validateClubeDaCasaDate(LocalDateTime dataEHoraDaPartida, Clube clubeDaCasa) {
         LocalDateTime dataCriaçãoClubeDaCasa = clubeDaCasa.getDataDeCriacao().atStartOfDay();

@@ -131,7 +131,7 @@ class BuscaAvancadaServiceTest {
         RankingDto expectedRank1 = new RankingDto(1, casa, 1);
         RankingDto expectedRank2 = new RankingDto(2, visitante, 1);
 
-        when(clubeService.listarClubesDto()).thenReturn(List.of(casa, visitante));
+        when(clubeService.listarClubesAtivos()).thenReturn(List.of(casa, visitante));
         when(clubeService.getClubeById(0)).thenReturn(casa);
         when(clubeService.getClubeById(1)).thenReturn(visitante);
         when(partidaService.getPartidasByClube(clubeDaCasa)).thenReturn(partidas);
@@ -142,7 +142,7 @@ class BuscaAvancadaServiceTest {
 
     @Test
     void testGetRanking_SemClubesCadastrados() {
-        when(clubeService.listarClubesDto()).thenReturn(List.of());
+        when(clubeService.listarClubesAtivos()).thenReturn(List.of());
 
         assertEquals(List.of(), buscaAvancadaService.getRanking());
     }
