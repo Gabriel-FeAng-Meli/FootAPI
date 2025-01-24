@@ -62,6 +62,10 @@ public class PartidaService {
 
     public PartidaDto createPartida(Partida partida) {
         partidaValidation.validateMatchInput(partida);
+        if (partida.getGolsClubeDaCasa() - partida.getGolsClubeVisitante() >= 3
+        || partida.getGolsClubeVisitante() - partida.getGolsClubeDaCasa() >= 3) {
+            partida.setGoleada(true);
+        }
 
         partidaRepository.save(partida);
 
